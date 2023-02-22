@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import math
 from collections import defaultdict
+import json
 
 def ceil(number, digits) -> float: return math.ceil((10.0 ** digits) * number) / (10.0 ** digits)
 
@@ -16,7 +17,13 @@ years = ["2016","2017","2018","2019","2020","2021"]
 #MWG: 16, CPLV:7
 
 def getRate(code):
-	classRate = defaultdict(list)
+	classA = defaultdict(list)
+	classB = defaultdict(list)
+	classC = defaultdict(list)
+	classD = defaultdict(list)
+	classE = defaultdict(list)
+	classF = defaultdict(list)
+	allClasses = defaultdict(list)
 	bankRate = defaultdict(list)
 	for bank in code:
 		dataBank = financial_report (symbol= bank, report_type='IncomeStatement', frequency='yearly')
@@ -59,46 +66,50 @@ def getRate(code):
 		#print(rateYearly)
 		bankRate[bank].append(rateYearly)
 		smaller={}
-		
+
 		if all(value >= 15 for value in rateYearly.values()):
 			print("Classs A: ",bank,",".join(str(v) for v in rateYearly.values()),"\n")
-			if bank in bankRate.keys():
-				if bank in classRate["A"]:
-					classRate["A"] = bankRate
-				else:
-					classRate["A"].append(bankRate)
+			if bank in classA[bank]:
+				classA[bank] = bankRate[bank]
+			else:
+				classA[bank].append(bankRate[bank])
 		else:
 			for i,j in rateYearly.items():
 				if j < 15:
 					smaller[i] = j
 
 		if len(smaller) == 1:
-			print("Class B:", bank, "01 year < 15%: ", list(smaller.keys())[0],"\n")
-			if bank in classRate["B"]:
-				classRate["B"] = bank
+			#print("Class B:", bank, "01 year < 15%: ", list(smaller.keys())[0],"\n")
+			if bank in classB[bank]:
+				classB[bank] = bankRate[bank]
 			else:
-				classRate["B"].append(smaller)
+				classB[bank].append(bankRate[bank])
 		elif len(smaller) ==2:
-			print("Class C:", bank, "has %d years < 15: " %len(smaller), ",".join(smaller.keys()),"\n")
-			if bank in classRate["C"]:
-				classRate["C"] = bank
+			#print("Class C:", bank, "has %d years < 15: " %len(smaller), ",".join(smaller.keys()),"\n")
+			if bank in classC[bank]:
+				classC[bank] = bankRate[bank]
 			else:
-				classRate["C"].append(bank)
+				classC[bank].append(bankRate[bank])
 		elif len(smaller) ==3:
-			print("Class D:", bank, "has %d years < 15: " %len(smaller), ",".join(smaller.keys()),"\n")
-			if bank in classRate["D"]:
-				classRate["D"] = bank
+			#print("Class D:", bank, "has %d years < 15: " %len(smaller), ",".join(smaller.keys()),"\n")
+			if bank in classD[bank]:
+				classD[bank] = bankRate[bank]
 			else:
-				classRate["D"].append(bank)
+				classD[bank].append(bankRate[bank])
 		elif len(smaller) ==4:
-			print("Class E:", bank, "has %d years < 15: " %len(smaller), ",".join(smaller.keys()),"\n")
-			if bank in classRate["E"]:
-				classRate["E"] = bank
+			#print("Class E:", bank, "has %d years < 15: " %len(smaller), ",".join(smaller.keys()),"\n")
+			if bank in classE[bank]:
+				classE[bank] = bankRate[bank]
 			else:
-				classRate["E"].append(bank)
+				classE[bank].append(bankRate[bank])	
 
-	print(classRate)
-	#print(bankRate)
+	allClasses["A"] = classA
+	allClasses["B"] = classB
+	allClasses["C"] = classC
+	allClasses["D"] = classD
+	allClasses["E"] = classE
+	print('all :', json.dumps(allClasses, indent=4))
+
 vcb = financial_report (symbol= "MWG", report_type='IncomeStatement', frequency='yearly')
 #mwg = financial_report (symbol= "MWG", report_type='IncomeStatement', frequency='yearly')
 
