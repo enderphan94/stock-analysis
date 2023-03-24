@@ -28,7 +28,7 @@ years = ["2016","2017","2018","2019","2020","2021"]
 # Tang truong / nam = ((EBIT(1-t)[-1]/EBIT(1-t)[0])^(1/5))-1
 
 allClasses = defaultdict(list)
-
+CEO = 0.15 # chi phí VCSH
 
 def getRate(code):
 	classA = defaultdict(list)
@@ -38,6 +38,9 @@ def getRate(code):
 	profitData = defaultdict(list)
 	bankPropoEquityPerYears=defaultdict(list)
 	bankPropoEquityPerYearsAv=defaultdict(list)
+	bankCapExpendPerYears=defaultdict(list)
+	bankCexpendPerY3ears=defaultdict(list)
+
 	for bank in code:
 		incomeData = financial_report (symbol= bank, report_type='IncomeStatement', frequency='yearly')
 		balanceData = financial_report (symbol= bank, report_type='BalanceSheet', frequency='yearly')
@@ -45,6 +48,7 @@ def getRate(code):
 		totalEquity={}
 		totalEquityAv={}
 		propoEquityPerYears={}
+		capExpendPerYears={}
 		totalDebt={}
 		totalDebtAv={}
 		bankEbit=[]
@@ -99,13 +103,13 @@ def getRate(code):
 					propoEquityPerYears[y] = ceil(propoEquityPerYear*100,2)
 					#print(y, ceil(propoEquityPerYear*100,2))
 
-		bankPropoEquityPerYears[bank].append(propoEquityPerYears)			
+		bankPropoEquityPerYears[bank].append(propoEquityPerYears)
+
 		# Tỷ trọng vốn chủ sổ hữu trên Tổng Vốn - Bình quân
 		bankPropoEquity = sum(totalEquity.values()) / (sum(totalEquity.values()) + sum(totalDebt.values()))
 		bankPropoEquityPerYearsAv[bank].append(ceil(bankPropoEquity*100,2))
 
-		print(bankPropoEquityPerYearsAv)
-
+		interestYearly={}
 		for column in incomeData.columns:
 			#note that the colum 15 and 16 of the retail is fucked up
 			#print(incomeData.iloc[21,0])
@@ -121,6 +125,7 @@ def getRate(code):
 						bankEbitDict[year]=res
 						bankEbit.append(res)
 						netProfitDict[year] = netProfit
+						interestYearly[year] = interest
 						#print(bank,year, income,interest, res)
 							
 
@@ -156,18 +161,56 @@ def getRate(code):
 
 			#print(rateYearly)
 			bankRate[bank].append(rateYearly)
-			
+		
+		#Chi phí nợ vay từng năm
+		for year, interest in interestYearly.items():
+				for y, debt in totalDebtAv.items():
+					if year == y:
+						capExpendPerYears[year] = ceil((interest/debt)*100,2)
+		bankCapExpendPerYears[bank].append(capExpendPerYears)
+
+		# Chi phí nợ vay, bình quân (3 năm gần nhất)
+		totalIn3 = 0
+		if all(inter is not None for inter in interestYearly.values()):
+			for inter in reversed(range(len(interestYearly))):
+				if(inter == 2):
+					break
+				totalIn3 += list(interestYearly.values())[inter]
+				inter = inter - 1
+		
+		totalDebt3 = 0
+		if all(debt is not None for debt in totalDebtAv.values()):
+			for debt in range(len(totalDebtAv)):
+				if(debt == 3):
+					break
+				totalDebt3 += list(totalDebtAv.values())[debt]
+				debt = debt + 1
+		
+		expendPerY3ears = ceil((totalIn3/totalDebt3)*100,2)
+		bankCexpendPerY3ears[bank].append(expendPerY3ears)
+
+
+		#ROAE - Tỷ suất lợi nhuận trên bình quân VCSH
+		
+
+
+
+		
 	for name, rate in ebitData.items():
 		for x,y in bankRate.items():
 			for i,j in profitData.items():
 				for a,b in bankPropoEquityPerYears.items():
 					for c,d in bankPropoEquityPerYearsAv.items():
-						if rate >= 15 and name == x and name == i and name == a and name == c:
-							classA[x] ="Tang truong tung nam: %s" %y,"Tang truong TB / nam (LN truoc lai vay sau thue): %s" % ceil(rate,2), "LN rong TB / nam: %s" % ceil(j,2),"Ty trong VCSH tren Tong Von tung nam: %s" % b \
-							, "Ty trong VCSH/ Tong Von (Binh quan): %s" % d
-						elif rate < 15 and name == x and name == i and name == a and name ==c:
-							classB[x] ="Tang truong tung nam: %s" %y,"Tang truong TB/  nam (LN truoc lai vay sau thue): %s" % ceil(rate,2), "LN rong / nam: %s" % ceil(j,2), "Ty trong VCSH tren Tong Von tung nam: %s" % b \
-							, "Ty trong VCSH/ Tong Von (Binh quan): %s" % d
+						for e,f in bankCapExpendPerYears.items():
+							for p,k in bankCexpendPerY3ears.items():
+								if rate >= 15 and name == x and name == i == a == c == e == p :
+									classA[x] ="Tang truong tung nam: %s" %y,"Tang truong TB / nam (LN truoc lai vay sau thue): %s" % ceil(rate,2), "LN rong TB / nam: %s" % ceil(j,2),"Ty trong VCSH tren Tong Von tung nam: %s" % b \
+									, "Ty trong VCSH/ Tong Von (Binh quan): %s" % d[0], "Ty trong von vay / Tong von (binh quan): %s" % str(ceil(100-d[0],2)) \
+									, "Chi phi no vay tung nam: %s" % f, "Binh quan chi phi no vay (3 nam): %s" % k[0]
+								elif rate < 15 and name == x and name == i == a == c == e == p:
+									classB[x] ="Tang truong tung nam: %s" %y,"Tang truong TB/  nam (LN truoc lai vay sau thue): %s" % ceil(rate,2), "LN rong / nam: %s" % ceil(j,2), "Ty trong VCSH tren Tong Von tung nam: %s" % b \
+									, "Ty trong VCSH/ Tong Von (Binh quan): %s" % d[0], "Ty trong von vay / Tong von (binh quan): %s" % str(ceil(100-d[0],2)) \
+									, "Chi phi no vay tung nam: %s" % f, "Binh quan chi phi no vay (3 nam): %s" % k[0]
 	
 	allClasses["A"] = classA
 	allClasses["B"] = classB
