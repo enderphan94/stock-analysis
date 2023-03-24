@@ -5,13 +5,18 @@ import math
 from collections import defaultdict
 import json
 
+pd.set_option('display.max_rows', 500)
+pd.set_option('display.max_columns', 500)
+pd.set_option('display.width', 150)
+
 def ceil(number, digits) -> float: return math.ceil((10.0 ** digits) * number) / (10.0 ** digits)
 
 #DO NOT CHANGE THE FIRST ELEMENT
-bank_code = ["CTG","BID","VCB","VIB","MBB","TCB","HDB","STB","EIB","ACB","VPB","MSB","NAB","PGB","ABB","KLB","SHB","SGB", "STB"]
+bank_code = ["CTG","BID","VCB","VIB","MBB","TCB","HDB","STB","EIB","ACB","VPB","MSB","NAB","PGB","ABB","KLB","SHB","SGB", "STB", "VPB"]
 #retail_code = ["AAT","BSC","ABR","AMD","AST","BTT","FRT","DGW","GCB","IMH","MWG","PET","PIV","PIT","HEX","IBC","SEC","PNG","PSD","T12","SID","CPH","ST8","HTC","KLF"]
 #bank_code = ["CTG","BID","VCB","VIB","MBB","TCB","HDB","STB"]
-retail_code = ["AAT","BSC","ABR","AMD","BTT","DGW","MWG"]
+retail_code = ["AAT","MWG"]
+single_code = ["BSC","AAT"]
 years = ["2016","2017","2018","2019","2020","2021"]
 
 # bank: 17, CPLV: 1
@@ -31,20 +36,85 @@ def getRate(code):
 	bankRate = defaultdict(list)
 	ebitData = defaultdict(list)
 	profitData = defaultdict(list)
+	bankPropoEquityPerYears=defaultdict(list)
+	bankPropoEquityPerYearsAv=defaultdict(list)
 	for bank in code:
-		dataBank = financial_report (symbol= bank, report_type='IncomeStatement', frequency='yearly')
+		incomeData = financial_report (symbol= bank, report_type='IncomeStatement', frequency='yearly')
+		balanceData = financial_report (symbol= bank, report_type='BalanceSheet', frequency='yearly')
+
+		totalEquity={}
+		totalEquityAv={}
+		propoEquityPerYears={}
+		totalDebt={}
+		totalDebtAv={}
 		bankEbit=[]
 		bankEbitDict={}
 		netProfitDict={}
-		for column in dataBank.columns:
-			#note that the colum 15 and 16 of the retail is fucked up
-			#print(dataBank.iloc[21,0])
-			if (code[0] =="AAT" and "Chi phí lãi vay" in dataBank.iloc[7,0] and "ròng trước thuế" in dataBank.iloc[15,0] and "thuần sau thuế" in dataBank.iloc[19,0]):
+		#print(balanceData.iloc[91,0])
+		for column in balanceData.columns:
+			if(code[0] =="AAT" and "Vay ngắn hạn" in balanceData.iloc[73,0] and "Vay dài hạn" in balanceData.iloc[86,0] and "VỐN CHỦ SỞ HỮU" in balanceData.iloc[91,0]):
 				for year in years:
 					if year in column:
-						income = np.abs(dataBank.loc[16,column])
-						netProfit = np.abs(dataBank.loc[20,column])
-						interest = np.abs(dataBank.loc[7,column])
+						# Co cau Von
+						shortLoan = np.abs(balanceData.loc[75,column])
+						longloan = np.abs(balanceData.loc[88,column])
+						totalLoan = shortLoan + longloan
+						totalDebt[year] = totalLoan
+
+						equity = np.abs(balanceData.loc[95,column])
+						totalEquity[year] = equity
+
+		# Tong vay binh quan
+		if all(debt is not None for debt in totalDebt.values()):
+			for debt in reversed(range(len(totalDebt))):
+				#if(debt+1 >= len(totalDebt)):
+				#	break
+				rs=0
+				if(debt == 0):
+					rs = list(totalDebt.values())[debt]
+				else:
+					rs = (list(totalDebt.values())[debt] + list(totalDebt.values())[debt-1])/2
+				#print(debt, bank, list(totalDebt.keys())[debt], rs)
+				totalDebtAv[list(totalDebt.keys())[debt]] = rs
+
+		# Binh quan Equity
+		if all(ed is not None for ed in totalEquity.values()):
+			for ed in reversed(range(len(totalEquity))):
+				#if(debt+1 >= len(totalDebt)):
+				#	break
+				rs=0
+				if(ed == 0):
+					rs = list(totalEquity.values())[ed]
+				else:
+					rs = (list(totalEquity.values())[ed] + list(totalEquity.values())[ed-1])/2
+				#print(debt, bank, list(totalDebt.keys())[debt], rs)
+				totalEquityAv[list(totalEquity.keys())[ed]] = rs
+
+
+		# Tỷ trọng vốn chủ sổ hữu trên Tổng Vốn = E/(D+E) từng năm
+		for y, ed in totalEquityAv.items():
+			for yr, debt in totalDebtAv.items():
+				if y == yr:
+					propoEquityPerYear = ed/(ed+debt)
+					propoEquityPerYears[y] = ceil(propoEquityPerYear*100,2)
+					#print(y, ceil(propoEquityPerYear*100,2))
+
+		bankPropoEquityPerYears[bank].append(propoEquityPerYears)			
+		# Tỷ trọng vốn chủ sổ hữu trên Tổng Vốn - Bình quân
+		bankPropoEquity = sum(totalEquity.values()) / (sum(totalEquity.values()) + sum(totalDebt.values()))
+		bankPropoEquityPerYearsAv[bank].append(ceil(bankPropoEquity*100,2))
+
+		print(bankPropoEquityPerYearsAv)
+
+		for column in incomeData.columns:
+			#note that the colum 15 and 16 of the retail is fucked up
+			#print(incomeData.iloc[21,0])
+			if (code[0] =="AAT" and "Chi phí lãi vay" in incomeData.iloc[7,0] and "ròng trước thuế" in incomeData.iloc[15,0] and "thuần sau thuế" in incomeData.iloc[19,0]):
+				for year in years:
+					if year in column:
+						income = np.abs(incomeData.loc[16,column])
+						netProfit = np.abs(incomeData.loc[20,column])
+						interest = np.abs(incomeData.loc[7,column])
 						ebit = income + interest
 						tax = 0.2
 						res = ebit*(1-tax)
@@ -52,18 +122,22 @@ def getRate(code):
 						bankEbit.append(res)
 						netProfitDict[year] = netProfit
 						#print(bank,year, income,interest, res)
-			if (code[0] =="CTG" and "Chi phí lãi" in dataBank.iloc[1,0] and "Tổng lợi nhuận trước thuế" in dataBank.iloc[17,0] and "Lợi nhuận sau thuế" in dataBank.iloc[21,0]):
+							
+
+			if (code[0] =="CTG" and "Chi phí lãi" in incomeData.iloc[1,0] and "Tổng lợi nhuận trước thuế" in incomeData.iloc[17,0] and "Lợi nhuận sau thuế" in incomeData.iloc[21,0]):
 				for year in years:
 					if year in column:
-						income = np.abs(dataBank.loc[17,column])
-						netProfit = np.abs(dataBank.loc[21,column])
-						interest = np.abs(dataBank.loc[1,column])
+						income = np.abs(incomeData.loc[17,column])
+						netProfit = np.abs(incomeData.loc[21,column])
+						interest = np.abs(incomeData.loc[1,column])
 						ebit = income + interest
 						tax = 0.2
 						res = ebit*(1-tax)
 						bankEbitDict[year]=res
 						bankEbit.append(res)
 						netProfitDict[year] = netProfit
+
+
 
 		rateYearly={}
 		#print(bankEbitDict)
@@ -86,22 +160,29 @@ def getRate(code):
 	for name, rate in ebitData.items():
 		for x,y in bankRate.items():
 			for i,j in profitData.items():
-				if rate >= 15 and name == x and name == i:
-					classA[x] = y,"Tang truong / nam: %s" % ceil(rate,2), "LN rong / nam: %s" % ceil(j,2)
-				elif rate < 15 and name == x and name == i:
-					classB[x] = y,"Tang truong /  nam: %s" % ceil(rate,2), "LN rong / nam: %s" % ceil(j,2)
+				for a,b in bankPropoEquityPerYears.items():
+					for c,d in bankPropoEquityPerYearsAv.items():
+						if rate >= 15 and name == x and name == i and name == a and name == c:
+							classA[x] ="Tang truong tung nam: %s" %y,"Tang truong TB / nam (LN truoc lai vay sau thue): %s" % ceil(rate,2), "LN rong TB / nam: %s" % ceil(j,2),"Ty trong VCSH tren Tong Von tung nam: %s" % b \
+							, "Ty trong VCSH/ Tong Von (Binh quan): %s" % d
+						elif rate < 15 and name == x and name == i and name == a and name ==c:
+							classB[x] ="Tang truong tung nam: %s" %y,"Tang truong TB/  nam (LN truoc lai vay sau thue): %s" % ceil(rate,2), "LN rong / nam: %s" % ceil(j,2), "Ty trong VCSH tren Tong Von tung nam: %s" % b \
+							, "Ty trong VCSH/ Tong Von (Binh quan): %s" % d
+	
 	allClasses["A"] = classA
 	allClasses["B"] = classB
 
 	print('all :', json.dumps(allClasses, indent=4))
 
-vcb = financial_report (symbol= "VCB", report_type='IncomeStatement', frequency='yearly')
-#mwg = financial_report (symbol= "MWG", report_type='IncomeStatement', frequency='yearly')
 
-print(vcb)
+vcb = financial_report (symbol= "MFS", report_type='BalanceSheet', frequency='yearly')
+mwg = financial_report (symbol= "MWG", report_type='BalanceSheet', frequency='yearly')
+
 #print(mwg)
+#print(mwg.loc[0][9],mwg.loc[75][9])
 
-getRate(bank_code)
+
+getRate(retail_code)
 
 
 
