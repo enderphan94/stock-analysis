@@ -10,12 +10,14 @@ pd.set_option('display.max_columns', 500)
 pd.set_option('display.width', 150)
 
 def ceil(number, digits) -> float: return math.ceil((10.0 ** digits) * number) / (10.0 ** digits)
-
+def div(n, d):
+    return n / d if d else 0
 #DO NOT CHANGE THE FIRST ELEMENT
 bank_code = ["CTG","BID","VCB","VIB","MBB","TCB","HDB","STB","EIB","ACB","VPB","MSB","NAB","PGB","ABB","KLB","SHB","SGB", "STB", "VPB"]
-#retail_code = ["AAT","BSC","ABR","AMD","AST","BTT","FRT","DGW","GCB","IMH","MWG","PET","PIV","PIT","HEX","IBC","SEC","PNG","PSD","T12","SID","CPH","ST8","HTC","KLF"]
+retail_code = ["AAT","BSC","ABR","AMD","BTT","DGW","MWG","PET","PIV","PIT","IBC","PSD","CPH","ST8","HTC","KLF","FPTR","TASECOAIRS","PTBD","PNCO","SCID"]
+# N/A: "IMH","HEX","SEC","T12"
 #bank_code = ["CTG","BID","VCB","VIB","MBB","TCB","HDB","STB"]
-retail_code = ["AAT","MWG"]
+#retail_code = ["AAT","FRT"]
 single_code = ["BSC","AAT"]
 years = ["2016","2017","2018","2019","2020","2021"]
 
@@ -40,8 +42,10 @@ def getRate(code):
 	bankPropoEquityPerYearsAv=defaultdict(list)
 	bankCapExpendPerYears=defaultdict(list)
 	bankCexpendPerY3ears=defaultdict(list)
+	bankROAEYears=defaultdict(list)
 
 	for bank in code:
+		#rint(bank)
 		incomeData = financial_report (symbol= bank, report_type='IncomeStatement', frequency='yearly')
 		balanceData = financial_report (symbol= bank, report_type='BalanceSheet', frequency='yearly')
 
@@ -67,7 +71,8 @@ def getRate(code):
 
 						equity = np.abs(balanceData.loc[95,column])
 						totalEquity[year] = equity
-
+			else:
+				print("somethin wrong happens")
 		# Tong vay binh quan
 		if all(debt is not None for debt in totalDebt.values()):
 			for debt in reversed(range(len(totalDebt))):
@@ -99,17 +104,18 @@ def getRate(code):
 		for y, ed in totalEquityAv.items():
 			for yr, debt in totalDebtAv.items():
 				if y == yr:
-					propoEquityPerYear = ed/(ed+debt)
+					propoEquityPerYear = div(ed,(ed+debt))
 					propoEquityPerYears[y] = ceil(propoEquityPerYear*100,2)
 					#print(y, ceil(propoEquityPerYear*100,2))
 
 		bankPropoEquityPerYears[bank].append(propoEquityPerYears)
 
 		# Tỷ trọng vốn chủ sổ hữu trên Tổng Vốn - Bình quân
-		bankPropoEquity = sum(totalEquity.values()) / (sum(totalEquity.values()) + sum(totalDebt.values()))
+		bankPropoEquity = div(sum(totalEquity.values()), (sum(totalEquity.values()) + sum(totalDebt.values())))
 		bankPropoEquityPerYearsAv[bank].append(ceil(bankPropoEquity*100,2))
 
 		interestYearly={}
+		netProfitYearly={}
 		for column in incomeData.columns:
 			#note that the colum 15 and 16 of the retail is fucked up
 			#print(incomeData.iloc[21,0])
@@ -126,6 +132,7 @@ def getRate(code):
 						bankEbit.append(res)
 						netProfitDict[year] = netProfit
 						interestYearly[year] = interest
+						netProfitYearly[year] = netProfit
 						#print(bank,year, income,interest, res)
 							
 
@@ -147,13 +154,13 @@ def getRate(code):
 		rateYearly={}
 		#print(bankEbitDict)
 		if all(res is not None for res in bankEbitDict.values()) and all(net is not None for net in netProfitDict.values()):
-			ebitData[bank] = (((list(bankEbitDict.values())[-1]/list(bankEbitDict.values())[0])**(1/5))-1)*100
-			profitData[bank] = (((list(netProfitDict.values())[-1]/list(netProfitDict.values())[0])**(1/5))-1)*100
+			ebitData[bank] = ((div(list(bankEbitDict.values())[-1],list(bankEbitDict.values())[0])**(1/5))-1)*100
+			profitData[bank] = ((div(list(netProfitDict.values())[-1],list(netProfitDict.values())[0])**(1/5))-1)*100
 			#print(bank,list(netProfitDict.values())[-1],list(netProfitDict.values())[0])
 			for ebit in range(len(bankEbitDict)):
 				if(ebit+1 >= len(bankEbitDict)):
 					break
-				ebit1t = (list(bankEbitDict.values())[ebit+1] - list(bankEbitDict.values())[ebit])/list(bankEbitDict.values())[ebit]
+				ebit1t = div((list(bankEbitDict.values())[ebit+1] - list(bankEbitDict.values())[ebit]),list(bankEbitDict.values())[ebit])
 				perdiod = str(list(bankEbitDict.keys())[ebit]) + "-" + str(list(bankEbitDict.keys())[ebit+1])
 				result = ceil(ebit1t * 100, 2)
 				rateYearly[perdiod] = result
@@ -166,7 +173,8 @@ def getRate(code):
 		for year, interest in interestYearly.items():
 				for y, debt in totalDebtAv.items():
 					if year == y:
-						capExpendPerYears[year] = ceil((interest/debt)*100,2)
+						res = div(interest,debt)
+						capExpendPerYears[year] = ceil(res*100,2)
 		bankCapExpendPerYears[bank].append(capExpendPerYears)
 
 		# Chi phí nợ vay, bình quân (3 năm gần nhất)
@@ -186,16 +194,24 @@ def getRate(code):
 				totalDebt3 += list(totalDebtAv.values())[debt]
 				debt = debt + 1
 		
-		expendPerY3ears = ceil((totalIn3/totalDebt3)*100,2)
+		expendPerY3ears = ceil(div(totalIn3,totalDebt3)*100,2)
 		bankCexpendPerY3ears[bank].append(expendPerY3ears)
 
 
 		#ROAE - Tỷ suất lợi nhuận trên bình quân VCSH
-		
+		roaeYearly={}
+		for year, equityAv in totalEquityAv.items():
+			for y, netProfit in netProfitYearly.items():
+				if year == y:
+					res = ceil(div(netProfit,equityAv)*100,2)
+					roaeYearly[year] = res
+
+		bankROAEYears[bank].append(roaeYearly)
 
 
 
-		
+
+	# PRINT DATA HERE
 	for name, rate in ebitData.items():
 		for x,y in bankRate.items():
 			for i,j in profitData.items():
@@ -203,14 +219,17 @@ def getRate(code):
 					for c,d in bankPropoEquityPerYearsAv.items():
 						for e,f in bankCapExpendPerYears.items():
 							for p,k in bankCexpendPerY3ears.items():
-								if rate >= 15 and name == x and name == i == a == c == e == p :
-									classA[x] ="Tang truong tung nam: %s" %y,"Tang truong TB / nam (LN truoc lai vay sau thue): %s" % ceil(rate,2), "LN rong TB / nam: %s" % ceil(j,2),"Ty trong VCSH tren Tong Von tung nam: %s" % b \
-									, "Ty trong VCSH/ Tong Von (Binh quan): %s" % d[0], "Ty trong von vay / Tong von (binh quan): %s" % str(ceil(100-d[0],2)) \
-									, "Chi phi no vay tung nam: %s" % f, "Binh quan chi phi no vay (3 nam): %s" % k[0]
-								elif rate < 15 and name == x and name == i == a == c == e == p:
-									classB[x] ="Tang truong tung nam: %s" %y,"Tang truong TB/  nam (LN truoc lai vay sau thue): %s" % ceil(rate,2), "LN rong / nam: %s" % ceil(j,2), "Ty trong VCSH tren Tong Von tung nam: %s" % b \
-									, "Ty trong VCSH/ Tong Von (Binh quan): %s" % d[0], "Ty trong von vay / Tong von (binh quan): %s" % str(ceil(100-d[0],2)) \
-									, "Chi phi no vay tung nam: %s" % f, "Binh quan chi phi no vay (3 nam): %s" % k[0]
+								for l,h in bankROAEYears.items():
+									if rate >= 15 and name == x and name == i == a == c == e == p == l:
+										classA[x] ="Tang truong tung nam: %s" %y,"Tang truong TB / nam (LN truoc lai vay sau thue): %s" % ceil(rate,2), "LN rong TB / nam: %s" % ceil(j,2),"Ty trong VCSH tren Tong Von tung nam: %s" % b \
+										, "Ty trong VCSH/ Tong Von (Binh quan): %s" % d[0], "Ty trong von vay / Tong von (binh quan): %s" % str(ceil(100-d[0],2)) \
+										, "Chi phi no vay tung nam: %s" % f, "Binh quan chi phi no vay (3 nam): %s" % k[0] \
+										, "ROAE: %s" % h
+									elif rate < 15 and name == x and name == i == a == c == e == p == l:
+										classB[x] ="Tang truong tung nam: %s" %y,"Tang truong TB/  nam (LN truoc lai vay sau thue): %s" % ceil(rate,2), "LN rong / nam: %s" % ceil(j,2), "Ty trong VCSH tren Tong Von tung nam: %s" % b \
+										, "Ty trong VCSH/ Tong Von (Binh quan): %s" % d[0], "Ty trong von vay / Tong von (binh quan): %s" % str(ceil(100-d[0],2)) \
+										, "Chi phi no vay tung nam: %s" % f, "Binh quan chi phi no vay (3 nam): %s" % k[0]\
+										, "ROAE: %s" % h
 	
 	allClasses["A"] = classA
 	allClasses["B"] = classB
@@ -219,7 +238,7 @@ def getRate(code):
 
 
 vcb = financial_report (symbol= "MFS", report_type='BalanceSheet', frequency='yearly')
-mwg = financial_report (symbol= "MWG", report_type='BalanceSheet', frequency='yearly')
+#mwg = financial_report (symbol= "AST", report_type='BalanceSheet', frequency='yearly')
 
 #print(mwg)
 #print(mwg.loc[0][9],mwg.loc[75][9])
