@@ -51,7 +51,7 @@ def submit():
         # Append the key and the value string to the rows list
         rows.append([key, value_str])   
     print(rows)
-    return render_template('result.html', headers=headers, rows=rows)
+    return render_template('result.html', code=user_input, rows=rows)
 
 
 if __name__ == '__main__':

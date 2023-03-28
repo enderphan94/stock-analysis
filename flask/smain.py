@@ -220,14 +220,14 @@ def getRate(bank):
 							for p,k in bankCexpendPerY3ears.items():
 								for l,h in bankROAEYears.items():
 									if name == x and name == i == a == c == e == p == l:
-											classA["Tang truong tung nam"].append(y)
-											classA["Tang truong TB / nam (LN truoc lai vay sau thue)"].append(ceil(rate,2))
-											classA["LN rong TB / nam"].append(ceil(j,2))
-											classA["Ty trong VCSH tren Tong Von tung nam"].append(b)
-											classA["Ty trong VCSH/ Tong Von (Binh quan)"].append(d[0])
-											classA["Ty trong von vay / Tong von (binh quan)"].append(str(ceil(100-d[0],2)))
-											classA["Chi phi no vay tung nam"].append(f)
-											classA["Binh quan chi phi no vay (3 nam)"].append(k[0])
+											classA["Tăng trưởng từng năm"].append(y)
+											classA["Tăng trưởng TB / năm (Lợi nhuận trước lãi vay sau thuế)"].append(ceil(rate,2))
+											classA["Lợi nhuận ròng TB / năm"].append(ceil(j,2))
+											classA["Tỷ trọng VCSH / Tổng Vốn từng năm"].append(b)
+											classA["Tỷ trọng VCSH / Tổng Vốn (Bình quân)"].append(d[0])
+											classA["Tỷ trọng vốn vay / Tổng vốn (Bình quân)"].append(str(ceil(100-d[0],2)))
+											classA["Chi phí nợ vay từng năm"].append(f)
+											classA["Bình quân chi phí nợ vay (3 năm)"].append(k[0])
 											classA["ROAE"].append(h)
 										# classA[x] ="Tang truong tung nam: %s" %y,"Tang truong TB / nam (LN truoc lai vay sau thue): %s" % ceil(rate,2), "LN rong TB / nam: %s" % ceil(j,2),"Ty trong VCSH tren Tong Von tung nam: %s" % b \
 										# , "Ty trong VCSH/ Tong Von (Binh quan): %s" % d[0], "Ty trong von vay / Tong von (binh quan): %s" % str(ceil(100-d[0],2)) \
