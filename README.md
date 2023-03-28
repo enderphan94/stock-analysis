@@ -30,3 +30,10 @@ all : {
     "B": {}
 }
 ```
+
+# Bugs:
+
+```
+cannot convert float NaN to integer
+```
+This happens when null data exists
