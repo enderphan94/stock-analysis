@@ -33,8 +33,11 @@ years = ["2016","2017","2018","2019","2020","2021"]
 
 allClasses = defaultdict(list)
 CEO = 0.15 # chi phí VCSH
+tax = 0.2
 
 def getRate(bank):
+	global CEO
+	global tax
 	classA = defaultdict(list)
 	classB = defaultdict(list)
 	bankRate = defaultdict(list)
@@ -42,10 +45,12 @@ def getRate(bank):
 	profitData = defaultdict(list)
 	bankPropoEquityPerYears=defaultdict(list)
 	bankPropoEquityPerYearsAv=defaultdict(list)
+	bankPropoMarginPerYears=defaultdict(list)
 	bankCapExpendPerYears=defaultdict(list)
 	bankCexpendPerY3ears=defaultdict(list)
 	bankROAEYears=defaultdict(list)
 	bankDiffRE=defaultdict(list)
+	bankWaccYearly=defaultdict(list)
 
 	incomeData = financial_report (symbol= bank, report_type='IncomeStatement', frequency='yearly')
 	balanceData = financial_report (symbol= bank, report_type='BalanceSheet', frequency='yearly')
@@ -53,6 +58,7 @@ def getRate(bank):
 	totalEquity={}
 	totalEquityAv={}
 	propoEquityPerYears={}
+	propoMarginPerYears={}
 	capExpendPerYears={}
 	totalDebt={}
 	totalDebtAv={}
@@ -113,6 +119,15 @@ def getRate(bank):
 
 	bankPropoEquityPerYears[bank].append(propoEquityPerYears)
 
+	# Tỷ trọng vốn vay / Tổng Vốn từng năm
+	for y, ed in totalEquityAv.items():
+		for yr, debt in totalDebtAv.items():
+			if y == yr:
+				propoMarginPerYear = div(debt,(ed+debt))
+				propoMarginPerYears[y] = ceil(propoMarginPerYear*100,2)
+
+	bankPropoMarginPerYears[bank].append(propoMarginPerYears)
+
 	# Tỷ trọng vốn chủ sổ hữu trên Tổng Vốn - Bình quân
 	bankPropoEquity = div(sum(totalEquity.values()), (sum(totalEquity.values()) + sum(totalDebt.values())))
 	bankPropoEquityPerYearsAv[bank].append(ceil(bankPropoEquity*100,2))
@@ -130,7 +145,6 @@ def getRate(bank):
 					netProfit = np.abs(incomeData.loc[20,column])
 					interest = np.abs(incomeData.loc[7,column])
 					ebit = income + interest
-					tax = 0.2
 					res = ebit*(1-tax)
 					bankEbitDict[year]=res
 					bankEbit.append(res)
@@ -147,7 +161,6 @@ def getRate(bank):
 					netProfit = np.abs(incomeData.loc[21,column])
 					interest = np.abs(incomeData.loc[1,column])
 					ebit = income + interest
-					tax = 0.2
 					res = ebit*(1-tax)
 					bankEbitDict[year]=res
 					bankEbit.append(res)
@@ -211,10 +224,24 @@ def getRate(bank):
 
 	bankROAEYears[bank].append(roaeYearly)
 
-
+	#Cách biệt giữa ROE và chi phí vốn Chủ sở hữu
 	latestROAE = list(roaeYearly.values())[0]
 	diffRE = latestROAE - (CEO*100)
 	bankDiffRE[bank].append(diffRE)
+
+	#Chi phí chi phí vốn của doanh nghiệp, WACC từng năm 
+	#WACC = (CP vốn VCSH * % vốn CSH) + (CP vốn vay * % vốn vay * (1 – thuế)) 
+	#=(B20*B36)+((B24*B28)*(1-$B$6))
+	waccYearly={}
+	for year, equity in propoEquityPerYears.items():
+		for y, margin in propoMarginPerYears.items():
+			for yr, cap in capExpendPerYears.items():
+				if year == y == yr:
+					wacc = ((equity*(CEO*100))/100) + (((margin*cap)/100)*(1-tax))
+					waccYearly[year] = ceil(wacc,2)
+
+	bankWaccYearly[bank].append(waccYearly)
+
 
 	# PRINT DATA HERE
 	for name, rate in ebitData.items():
@@ -222,22 +249,26 @@ def getRate(bank):
 			for i,j in profitData.items():
 				for a,b in bankPropoEquityPerYears.items():
 					for c,d in bankPropoEquityPerYearsAv.items():
-						for e,f in bankCapExpendPerYears.items():
-							for p,k in bankCexpendPerY3ears.items():
-								for l,h in bankROAEYears.items():
-									for n,m in bankDiffRE.items():
-										if name == x and name == i == a == c == e == p == l:
-											classA["Tăng trưởng từng năm"].append(y)
-											classA["Tăng trưởng TB / năm (Lợi nhuận trước lãi vay sau thuế)"].append(ceil(rate,2))
-											classA["Lợi nhuận ròng TB / năm"].append(ceil(j,2))
-											classA["Tỷ trọng VCSH / Tổng Vốn từng năm"].append(b)
-											classA["Tỷ trọng VCSH / Tổng Vốn (Bình quân)"].append(d[0])
-											classA["Tỷ trọng vốn vay / Tổng vốn (Bình quân)"].append(str(ceil(100-d[0],2)))
-											classA["Chi phí nợ vay từng năm"].append(f)
-											classA["Bình quân chi phí nợ vay (3 năm)"].append(k[0])
-											classA["ROAE"].append(h)
-											classA["Cách biệt giữa ROE và chi phí vốn Chủ sở hữu"].append(m)
-										
+						for o,u in bankPropoMarginPerYears.items():
+							for e,f in bankCapExpendPerYears.items():
+								for p,k in bankCexpendPerY3ears.items():
+									for l,h in bankROAEYears.items():
+										for n,m in bankDiffRE.items():
+											for ywacc, vwacc in bankWaccYearly.items():	
+												if name == x and name == i == a == c == e == p == l == o == ywacc:
+													classA["Tăng trưởng từng năm"].append(y)
+													classA["Tăng trưởng TB / năm (Lợi nhuận trước lãi vay sau thuế)"].append(ceil(rate,2))
+													classA["Lợi nhuận ròng TB / năm"].append(ceil(j,2))
+													classA["Tỷ trọng VCSH / Tổng Vốn từng năm"].append(b)
+													classA["Tỷ trọng VCSH / Tổng Vốn (Bình quân)"].append(d[0])
+													classA["Tỷ trọng vốn vay / Tổng Vốn từng năm"].append(u)
+													classA["Tỷ trọng vốn vay / Tổng vốn (Bình quân)"].append(str(ceil(100-d[0],2)))
+													classA["Chi phí nợ vay từng năm"].append(f)
+													classA["Bình quân chi phí nợ vay (3 năm)"].append(k[0])
+													classA["ROAE"].append(h)
+													classA["Cách biệt giữa ROE và chi phí vốn Chủ sở hữu"].append(m)
+													classA["WACC"].append(vwacc)
+												
 									
 
 	#allClasses[bank] = classA
