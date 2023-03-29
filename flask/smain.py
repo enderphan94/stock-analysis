@@ -229,42 +229,12 @@ def getRate(bank):
 											classA["Chi phí nợ vay từng năm"].append(f)
 											classA["Bình quân chi phí nợ vay (3 năm)"].append(k[0])
 											classA["ROAE"].append(h)
-										# classA[x] ="Tang truong tung nam: %s" %y,"Tang truong TB / nam (LN truoc lai vay sau thue): %s" % ceil(rate,2), "LN rong TB / nam: %s" % ceil(j,2),"Ty trong VCSH tren Tong Von tung nam: %s" % b \
-										# , "Ty trong VCSH/ Tong Von (Binh quan): %s" % d[0], "Ty trong von vay / Tong von (binh quan): %s" % str(ceil(100-d[0],2)) \
-										# , "Chi phi no vay tung nam: %s" % f, "Binh quan chi phi no vay (3 nam): %s" % k[0] \
-										# , "ROAE: %s" % h
+										
 									
 
 	#allClasses[bank] = classA
 	result = json.dumps(classA, indent=4)
 	print(result)
-	#data = result.replace("'", '"')
-	# data_dict = json.loads(result)
-	# key = list(data_dict.keys())[0]
-	# value = data_dict[key]
-	# #value = str(value).strip("[]{}")
-	# print(value[0])
-	#for key, value in classA.items():
-	#	print(key, value)
-	
-
-	# # Extract the values from the dictionary
-	# values = data['Result'][bank]
-
-	# # Create a pandas DataFrame from the list of values
-	# df = pd.DataFrame({'Values': values})
-
-	# # Split the 'Values' column into two columns based on the colon separator
-	# df[['Indicator', 'Value']] = df['Values'].str.split(': ', expand=True)
-
-	# # Remove the square brackets and single quotes from the 'Value' column
-	# df['Value'] = df['Value'].str.strip("[]'")
-
-	# # Remove the 'Values' column
-	# df.drop('Values', axis=1, inplace=True)
-
-	# # Print the resulting table
-	# print(df)
 
 #vcb = financial_report (symbol= "MFS", report_type='BalanceSheet', frequency='yearly')
 #mwg = financial_report (symbol= "AST", report_type='BalanceSheet', frequency='yearly')

@@ -31,7 +31,6 @@ def submit():
     data = subprocess.check_output(cmd).decode('utf-8')
     #print(data)
     data_dict = json.loads(data.replace("'", "\""))
-    print(data_dict)
     headers = list(data_dict.keys())
     rows = []
 
@@ -50,7 +49,6 @@ def submit():
 
         # Append the key and the value string to the rows list
         rows.append([key, value_str])   
-    print(rows)
     return render_template('result.html', code=user_input, rows=rows)
 
 

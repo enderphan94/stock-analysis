@@ -1,85 +1,83 @@
 <!doctype html>
 <html>
 <style type="text/css">
-  h1 {
-        font-size: 70px;
-        font-weight: 600;
-        font-family: -apple-system,system-ui,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-        background-image: linear-gradient(to left, #EF4765, #553c9a);
-        color: transparent;
-        background-clip: text;
-        -webkit-background-clip: text;
-        text-align: center;
-      }
+h1 {
+    font-size: 70px;
+    font-weight: 600;
+    font-family: -apple-system, system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-image: linear-gradient(to left, #EF4765, #553c9a);
+    color: transparent;
+    background-clip: text;
+    -webkit-background-clip: text;
+    text-align: center;
+}
 
-  * {
-  font-family: -apple-system,system-ui,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+* {
+    font-family: -apple-system, system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
 .content-table {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: auto 0;
-  font-size: 0.9em;
-  min-width: 400px;
-  border-radius: 15px 15px 15px 15px;
-  overflow: hidden;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.60);
-  
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: auto 0;
+    font-size: 0.9em;
+    min-width: 400px;
+    border-radius: 15px 15px 15px 15px;
+    overflow: hidden;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.60);
+
 }
 
 .content-table thead tr {
-  background-color: #009879;
-  color: #ffffff;
-  text-align: left;
-  font-weight: bold;
+    background-color: #009879;
+    color: #ffffff;
+    text-align: left;
+    font-weight: bold;
 }
 
 .content-table th,
 .content-table td {
-  padding: 12px 15px;
+    padding: 12px 15px;
 }
 
 .content-table tbody tr {
-  border-bottom: 1px solid #dddddd;
+    border-bottom: 1px solid #dddddd;
 }
 
 .content-table tbody tr:nth-of-type(even) {
-  background-color: #f3f3f3;
+    background-color: #f3f3f3;
 }
 
 .content-table tbody tr:last-of-type {
-  border-bottom: 2px solid #553c9a;
+    border-bottom: 2px solid #553c9a;
 }
 
 .content-table tbody tr.active-row {
-  font-weight: bold;
-  color: #b393d3;
+    font-weight: bold;
+    color: #b393d3;
 }
-
 </style>
-  <head>
+
+<head>
     <title>JSON to Table Example</title>
     <h1>{{ code }}</h1>
-  </head>
+</head>
 
-  <body>
-    
-    
-    
-    <table class="content-table">   
-      <tbody>
-        {% for row in rows %}
-        <tr>
-          {% for item in row %}
-          <td>
-           {{ item }}
-          </td>
-          {% endfor %}
-        </tr>
-        {% endfor %}
-      </tbody>
+<body>
+    <table class="content-table">
+        <tbody>
+            {% for row in rows %}
+            <tr>
+                {% for item in row %}
+                <td>
+                    {{ item }}
+                </td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </tbody>
     </table>
-  </body>
+</body>
+
 </html>
