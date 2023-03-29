@@ -55,10 +55,24 @@ def getRate(bank):
 	bankRoceYearly=defaultdict(list)
 	bankRoceYearlyAv=defaultdict(list)
 	bankDiffRF=defaultdict(list)
+	bankWorkingCapitalYears=defaultdict(list)
+	bankWorkingCapitalChangedYears=defaultdict(list)
+	bankReinvestFixedAsset=defaultdict(list)
+	bankTotalReInvestDict=defaultdict(list)
+	freeProfitCashDict=defaultdict(list)
+	proReinvestYearlyDict=defaultdict(list)
+	totalReinvestAvDict=defaultdict(list)
+	fastGrowthRateDict=defaultdict(list)
 
 	incomeData = financial_report (symbol= bank, report_type='IncomeStatement', frequency='yearly')
 	balanceData = financial_report (symbol= bank, report_type='BalanceSheet', frequency='yearly')
+	cashData = financial_report (symbol= bank, report_type='cashflow', frequency='yearly')
 
+	#dict
+
+	shortLoanYears={}
+	shortDebtYears={}
+	shortAssetYears={}
 	totalEquity={}
 	totalEquityAv={}
 	propoEquityPerYears={}
@@ -69,19 +83,44 @@ def getRate(bank):
 	bankEbit=[]
 	bankEbitDict={}
 	netProfitDict={}
-	#print(balanceData.iloc[91,0])
+	buyAssetYears={}
+	liqAssetYears={}
+	depreDataYears={}
+
 	for column in balanceData.columns:
-		if("Vay ngắn hạn" in balanceData.iloc[73,0] and "Vay dài hạn" in balanceData.iloc[86,0] and "VỐN CHỦ SỞ HỮU" in balanceData.iloc[91,0]):
+		if("Vay ngắn hạn" in balanceData.iloc[73,0] and "Vay dài hạn" in balanceData.iloc[86,0] and "VỐN CHỦ SỞ HỮU" in balanceData.iloc[91,0]\
+				and "TÀI SẢN NGẮN HẠN" in balanceData.iloc[1][0] and "Nợ ngắn hạn" in balanceData.loc[65][0] and "Tiền mua tài sản cố định và các tài sản dài hạn khác" in cashData.loc[22][0]\
+				 and "Tiền thu được từ thanh lý tài sản cố định" in cashData.loc[23][0] and "Khấu hao TSCĐ" in cashData.loc[3][0]):
 			for year in years:
 				if year in column:
 					# Co cau Von
 					shortLoan = np.abs(balanceData.loc[75,column])
+					shortLoanYears[year]= shortLoan
+
 					longloan = np.abs(balanceData.loc[88,column])
 					totalLoan = shortLoan + longloan
 					totalDebt[year] = totalLoan
 
 					equity = np.abs(balanceData.loc[95,column])
 					totalEquity[year] = equity
+
+					shortAsset = np.abs(balanceData.loc[1,column])
+					shortAssetYears[year] = shortAsset
+
+					shortDebt = np.abs(balanceData.loc[65,column])
+					shortDebtYears[year] = shortDebt
+
+					buyAsset = np.abs(cashData.loc[22,column])
+					buyAssetYears[year] = buyAsset
+
+					liqAsset = np.abs(cashData.loc[23,column])
+					liqAssetYears[year] = liqAsset
+
+					depreData = np.abs(cashData.loc[3, column])
+					depreDataYears[year] = depreData
+
+
+					
 		else:
 			print("something wrong happens")
 	
@@ -170,7 +209,7 @@ def getRate(bank):
 					netProfitDict[year] = netProfit
 
 
-
+	# Tang truong tung nam				
 	rateYearly={}
 	if all(res is not None for res in bankEbitDict.values()) and all(net is not None for net in netProfitDict.values()):
 		ebitData[bank] = ((div(list(bankEbitDict.values())[-1],list(bankEbitDict.values())[0])**(1/5))-1)*100
@@ -189,7 +228,7 @@ def getRate(bank):
 		bankRate[bank].append(rateYearly)
 	
 	#Chi phí nợ vay từng năm
-	for year, interest in interestYearly.items():
+	for year, interest in reversed(list(interestYearly.items())):
 			for y, debt in totalDebtAv.items():
 				if year == y:
 					res = div(interest,debt)
@@ -274,13 +313,102 @@ def getRate(bank):
 	#Tỷ suất sinh lợi ROCE -  Bình quân 
 	#=SUM(B7:G7)/(SUM(B47:G47)+SUM(B48:G48))
 	roceAv = div(sum(bankEbitDict.values()),(sum(totalEquityAv.values())+sum(totalDebtAv.values()))) * 100
-	bankRoceYearlyAv[bank].append(ceil(roceAv,2))
+	roceAv = ceil(roceAv,2)
+	bankRoceYearlyAv[bank].append(roceAv)
 
 	#Cách biệt giữa ROCE và WACC
-	
 	diffRW = roceAv-waccAv
-
 	bankDiffRF[bank].append(ceil(diffRW,2))
+
+	# Vốn lưu động = TS ngắn hạn - Nợ Ngắn hạn + Vay ngắn hạn
+
+	workingCapitalYears={}
+	for y, debt in shortDebtYears.items():
+		for year, loan in shortLoanYears.items():
+			for yr, asset in shortAssetYears.items():
+				if y == year == yr:
+					workingCapital = asset - debt + loan
+					workingCapitalYears[year] = workingCapital
+
+	bankWorkingCapitalYears[bank].append(workingCapitalYears)
+
+	# Thay đổi vốn lưu động
+	workingCapitalChangedYears={}
+	if all(cap is not None for cap in workingCapitalYears.values()):
+		for cap in reversed(range(len(workingCapitalYears))):
+			#if(debt+1 >= len(totalDebt)):
+			#	break
+			rs=0
+			if(cap == 0):
+				rs = list(workingCapitalYears.values())[cap]
+			else:
+				rs = list(workingCapitalYears.values())[cap] - list(workingCapitalYears.values())[cap-1]
+			
+			workingCapitalChangedYears[list(workingCapitalYears.keys())[cap]] = rs
+
+	bankWorkingCapitalChangedYears[bank].append(workingCapitalChangedYears)
+
+	
+	# Đầu tư TS cố định (Mua tài sản - Thanh lý TS)
+	investFixedAsset={}
+	for year, buy in reversed(list(buyAssetYears.items())):
+		for y, liq in liqAssetYears.items():
+			if year == y:
+				fixedAsset = buy - liq
+				investFixedAsset[year] = fixedAsset 
+	
+	# Tái đầu tư TS cố định
+	reinvestFixedAsset={}
+	for year, investFixed in investFixedAsset.items():
+		for y, dep in depreDataYears.items():
+			if year == y:
+				reInvest = investFixed - dep
+				reinvestFixedAsset[y] = reInvest
+
+	bankReinvestFixedAsset[bank].append(reinvestFixedAsset) 
+
+
+	# Tổng tái đầu tư
+	totalReInvestDict={}
+	for year, workingcap in workingCapitalChangedYears.items():
+		for y, reinvest in reinvestFixedAsset.items():
+			if year == y:
+				totalReInvest = workingcap + reinvest
+				totalReInvestDict[year] = totalReInvest
+
+	bankTotalReInvestDict[bank].append(totalReInvestDict)
+	
+	# Dòng tiền lợi nhuận tự do
+	freeProfitCash={}
+	for year, ebit in reversed(list(bankEbitDict.items())):
+		for y, totalInvest in reversed(list(totalReInvestDict.items())):
+			if year == y:
+				freeCash = ebit - totalInvest
+				freeProfitCash[year] = freeCash
+
+	freeProfitCashDict[bank].append(freeProfitCash)
+
+	# Tỷ lệ tái đầu tư các năm  = Mức Tái đầu tư / EBIT*(1-Tc))
+	proReinvestYearly={}
+
+	for year, totalInvest in totalReInvestDict.items():
+		for y, ebit in bankEbitDict.items():
+			if year == y:
+				proRein = (totalInvest/ebit)*100
+				proReinvestYearly[year] = ceil(proRein,2)
+	
+	proReinvestYearlyDict[bank].append(proReinvestYearly)
+
+
+	# Tỷ lệ tái đầu tư - Bình quân 
+	totalReinvestAv = div(sum(totalReInvestDict.values()),sum(bankEbitDict.values()))*100
+	totalReinvestAv = ceil(totalReinvestAv,2)
+	totalReinvestAvDict[bank].append(totalReinvestAv)
+
+	# Tốc độ tăng trưởng giai đoạn nhanh 
+	fastGrowthRate = div(roceAv*totalReinvestAv,100)
+	fastGrowthRate = ceil(fastGrowthRate,2)
+	fastGrowthRateDict[bank].append(fastGrowthRate)
 
 	# PRINT DATA HERE
 	for name, rate in ebitData.items():
@@ -298,25 +426,42 @@ def getRate(bank):
 													for broce, vroce in bankRoceYearly.items():
 														for broceav, vroceav in bankRoceYearlyAv.items():
 															for brf, vrf in bankDiffRF.items():
-																if name == x == i == a == c == e == p == l == o == bwacc == bwaccav == broce:
-																	classA["Tăng trưởng từng năm"].append(y)
-																	classA["Tăng trưởng TB / năm (Lợi nhuận trước lãi vay sau thuế)"].append(ceil(rate,2))
-																	classA["Lợi nhuận ròng TB / năm"].append(ceil(j,2))
-																	classA["Tỷ trọng VCSH / Tổng Vốn từng năm"].append(b)
-																	classA["Tỷ trọng VCSH / Tổng Vốn (Bình quân)"].append(d[0])
-																	classA["Tỷ trọng vốn vay / Tổng Vốn từng năm"].append(u)
-																	classA["Tỷ trọng vốn vay / Tổng vốn (Bình quân)"].append(str(ceil(100-d[0],2)))
-																	classA["Chi phí nợ vay từng năm"].append(f)
-																	classA["Bình quân chi phí nợ vay (3 năm)"].append(k[0])
-																	classA["ROAE"].append(h)
-																	classA["Cách biệt giữa ROE và chi phí vốn Chủ sở hữu"].append(m)
-																	classA["WACC từng năm"].append(vwacc)
-																	classA["WACC Bình quân"].append(vwaccav[0])
-																	classA["ROCE từng năm"].append(vroce)
-																	classA["ROCE bình quân"].append(vroceav[0])
-																	classA["Cách biệt giữa ROE và WACC"].append(vrf)
+																for bworkingcap, vworkingcap in bankWorkingCapitalChangedYears.items():
+																	for breinvest, vreinvest in bankReinvestFixedAsset.items():
+																		for btotalreinvest, vtotalreinvest in bankTotalReInvestDict.items():
+																			for bfreecash, vfreecash in freeProfitCashDict.items():
+																				for bproinvest, vproinvest in proReinvestYearlyDict.items():
+																					if name == x == i == a == c == e == p == l == o == bwacc == bwaccav == broce == bworkingcap == btotalreinvest == bproinvest:
+																						classA["Tăng trưởng từng năm"].append(y)
+																						classA["Tăng trưởng TB / năm (Lợi nhuận trước lãi vay sau thuế)"].append(ceil(rate,2))
+																						classA["Lợi nhuận ròng TB / năm"].append(ceil(j,2))
+																						classA["Tỷ trọng VCSH / Tổng Vốn từng năm"].append(b)
+																						classA["Tỷ trọng VCSH / Tổng Vốn (Bình quân)"].append(d[0])
+																						classA["Tỷ trọng vốn vay / Tổng Vốn từng năm"].append(u)
+																						classA["Tỷ trọng vốn vay / Tổng vốn (Bình quân)"].append(str(ceil(100-d[0],2)))
+																						classA["Chi phí nợ vay từng năm"].append(f)
+																						classA["Bình quân chi phí nợ vay (3 năm)"].append(k[0])
+																						classA["ROAE"].append(h)
+																						classA["Cách biệt giữa ROE và chi phí vốn Chủ sở hữu"].append(m)
+																						classA["WACC từng năm"].append(vwacc)
+																						classA["WACC Bình quân"].append(vwaccav[0])
+																						classA["ROCE từng năm"].append(vroce)
+																						classA["ROCE bình quân"].append(vroceav[0])
+																						classA["Cách biệt giữa ROE và WACC"].append(vrf)
+																						classA["Thay đổi Vốn lưu động"].append(vworkingcap)
+																						classA["Tái đầu tư TS cố định"].append(vreinvest)
+																						classA["Tổng tái đầu tư"].append(vtotalreinvest)
+																						classA["Dòng tiền lợi nhuận tự do"].append(vfreecash)
+																						classA["Tỷ lệ tái đầu tư các năm"].append(vproinvest)
+																								#classA["Tỷ lệ tái đầu tư (Bình quân) "].append(vtotalreinvestav)
+																								#classA["Tốc độ tăng trưởng giai đoạn nhanh ((Tỷ lệ tái đầu tư * Tỷ suất sinh lợi trên vốn))"].append(vfastgrowth)
 
-													
+
+	for btotalreinvestav, vtotalreinvestav in totalReinvestAvDict.items():
+		for bfastgrowth, vfastgrowth in fastGrowthRateDict.items():
+				if btotalreinvestav == bfastgrowth:
+					classA["Tỷ lệ tái đầu tư (Bình quân) "].append(vtotalreinvestav)
+					classA["Tốc độ tăng trưởng giai đoạn nhanh (Tỷ lệ tái đầu tư * Tỷ suất sinh lợi trên vốn)"].append(vfastgrowth)												
 									
 
 	#allClasses[bank] = classA
@@ -324,11 +469,11 @@ def getRate(bank):
 	print(result)
 
 #vcb = financial_report (symbol= "MFS", report_type='BalanceSheet', frequency='yearly')
-#mwg = financial_report (symbol= "AST", report_type='BalanceSheet', frequency='yearly')
-
-#print(mwg)
-#print(mwg.loc[0][9],mwg.loc[75][9])
-
+# mwgcash = financial_report (symbol= "MWG", report_type='cashflow', frequency='yearly')
+# mwgbal = financial_report (symbol= "MWG", report_type='BalanceSheet', frequency='yearly')
+# print(mwgcash)
+# print(mwgcash.loc[22][0],mwgcash.loc[22][9])
+# print(mwgcash.loc[23][0],mwgcash.loc[23][9])
 
 if __name__ == "__main__":
 
@@ -342,3 +487,8 @@ if __name__ == "__main__":
 	
 	code = args.code
 	getRate(code)
+
+
+
+
+
