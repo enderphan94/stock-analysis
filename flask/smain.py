@@ -45,6 +45,7 @@ def getRate(bank):
 	bankCapExpendPerYears=defaultdict(list)
 	bankCexpendPerY3ears=defaultdict(list)
 	bankROAEYears=defaultdict(list)
+	bankDiffRE=defaultdict(list)
 
 	incomeData = financial_report (symbol= bank, report_type='IncomeStatement', frequency='yearly')
 	balanceData = financial_report (symbol= bank, report_type='BalanceSheet', frequency='yearly')
@@ -210,6 +211,11 @@ def getRate(bank):
 
 	bankROAEYears[bank].append(roaeYearly)
 
+
+	latestROAE = list(roaeYearly.values())[0]
+	diffRE = latestROAE - (CEO*100)
+	bankDiffRE[bank].append(diffRE)
+
 	# PRINT DATA HERE
 	for name, rate in ebitData.items():
 		for x,y in bankRate.items():
@@ -219,7 +225,8 @@ def getRate(bank):
 						for e,f in bankCapExpendPerYears.items():
 							for p,k in bankCexpendPerY3ears.items():
 								for l,h in bankROAEYears.items():
-									if name == x and name == i == a == c == e == p == l:
+									for n,m in bankDiffRE.items():
+										if name == x and name == i == a == c == e == p == l:
 											classA["Tăng trưởng từng năm"].append(y)
 											classA["Tăng trưởng TB / năm (Lợi nhuận trước lãi vay sau thuế)"].append(ceil(rate,2))
 											classA["Lợi nhuận ròng TB / năm"].append(ceil(j,2))
@@ -229,6 +236,7 @@ def getRate(bank):
 											classA["Chi phí nợ vay từng năm"].append(f)
 											classA["Bình quân chi phí nợ vay (3 năm)"].append(k[0])
 											classA["ROAE"].append(h)
+											classA["Cách biệt giữa ROE và chi phí vốn Chủ sở hữu"].append(m)
 										
 									
 
@@ -255,7 +263,3 @@ if __name__ == "__main__":
 	
 	code = args.code
 	getRate(code)
-
-
-
-
