@@ -34,6 +34,17 @@ all : {
 # Bugs:
 
 ```
-cannot convert float NaN to integer
+[FIXED] cannot convert float NaN to integer
 ```
 This happens when null data exists
+
+
+# Flask
+
+```
+export FLASK_APP=stockWeb.py
+```
+
+```
+python3 -m flask run
+```
