@@ -1,5 +1,9 @@
 # stock-analysis
 
+```
+main.py is a heavy version, it will run thruout the market and find the best code.
+```
+
 # SAMPLE OUTPUT
 ```
 all : {
