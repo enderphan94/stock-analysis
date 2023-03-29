@@ -51,6 +51,7 @@ def getRate(bank):
 	bankROAEYears=defaultdict(list)
 	bankDiffRE=defaultdict(list)
 	bankWaccYearly=defaultdict(list)
+	bankWaccAv=defaultdict(list)
 
 	incomeData = financial_report (symbol= bank, report_type='IncomeStatement', frequency='yearly')
 	balanceData = financial_report (symbol= bank, report_type='BalanceSheet', frequency='yearly')
@@ -243,6 +244,22 @@ def getRate(bank):
 	bankWaccYearly[bank].append(waccYearly)
 
 
+	#Chi phí vốn của doanh nghiệp WACC - Bình quân
+	#=(B22*B36)+((B25*B29)*(1-B6))
+
+
+	for bank, proproEq in bankPropoEquityPerYearsAv.items():
+		for bank, cap in bankCexpendPerY3ears.items():
+			if bank == bank:
+				B22 = proproEq[0]
+				B36 = CEO 
+				B25 = ceil(100-B22,2)
+				B29 = cap[0]
+				waccAv = ((B22*(B36*100))/100)+(((B25*B29)/100)*(1-tax))
+				bankWaccAv[bank].append(ceil(waccAv,2))
+	
+
+
 	# PRINT DATA HERE
 	for name, rate in ebitData.items():
 		for x,y in bankRate.items():
@@ -254,20 +271,22 @@ def getRate(bank):
 								for p,k in bankCexpendPerY3ears.items():
 									for l,h in bankROAEYears.items():
 										for n,m in bankDiffRE.items():
-											for ywacc, vwacc in bankWaccYearly.items():	
-												if name == x and name == i == a == c == e == p == l == o == ywacc:
-													classA["Tăng trưởng từng năm"].append(y)
-													classA["Tăng trưởng TB / năm (Lợi nhuận trước lãi vay sau thuế)"].append(ceil(rate,2))
-													classA["Lợi nhuận ròng TB / năm"].append(ceil(j,2))
-													classA["Tỷ trọng VCSH / Tổng Vốn từng năm"].append(b)
-													classA["Tỷ trọng VCSH / Tổng Vốn (Bình quân)"].append(d[0])
-													classA["Tỷ trọng vốn vay / Tổng Vốn từng năm"].append(u)
-													classA["Tỷ trọng vốn vay / Tổng vốn (Bình quân)"].append(str(ceil(100-d[0],2)))
-													classA["Chi phí nợ vay từng năm"].append(f)
-													classA["Bình quân chi phí nợ vay (3 năm)"].append(k[0])
-													classA["ROAE"].append(h)
-													classA["Cách biệt giữa ROE và chi phí vốn Chủ sở hữu"].append(m)
-													classA["WACC"].append(vwacc)
+											for ywacc, vwacc in bankWaccYearly.items():
+												for ywaccav, vwaccav in bankWaccAv.items():	
+													if name == x and name == i == a == c == e == p == l == o == ywacc:
+														classA["Tăng trưởng từng năm"].append(y)
+														classA["Tăng trưởng TB / năm (Lợi nhuận trước lãi vay sau thuế)"].append(ceil(rate,2))
+														classA["Lợi nhuận ròng TB / năm"].append(ceil(j,2))
+														classA["Tỷ trọng VCSH / Tổng Vốn từng năm"].append(b)
+														classA["Tỷ trọng VCSH / Tổng Vốn (Bình quân)"].append(d[0])
+														classA["Tỷ trọng vốn vay / Tổng Vốn từng năm"].append(u)
+														classA["Tỷ trọng vốn vay / Tổng vốn (Bình quân)"].append(str(ceil(100-d[0],2)))
+														classA["Chi phí nợ vay từng năm"].append(f)
+														classA["Bình quân chi phí nợ vay (3 năm)"].append(k[0])
+														classA["ROAE"].append(h)
+														classA["Cách biệt giữa ROE và chi phí vốn Chủ sở hữu"].append(m)
+														classA["WACC (Chi phí vốn doanh nghiệp)"].append(vwacc)
+														classA["WACC Bình quân"].append(vwaccav[0])
 												
 									
 
