@@ -180,7 +180,7 @@ def getRate(bank):
 	for column in incomeData.columns:
 		#note that the colum 15 and 16 of the retail is fucked up
 		#print(incomeData.iloc[21,0])
-		if ("Chi phí lãi vay" in incomeData.iloc[7,0] and "ròng trước thuế" in incomeData.iloc[15,0] and "thuần sau thuế" in incomeData.iloc[19,0]):
+		if ("Chi phí lãi vay" in incomeData.loc[7][0] and "ròng trước thuế" in incomeData.loc[16][0] and "thuần sau thuế" in incomeData.loc[20][0]):
 			for year in years:
 				if year in column:
 					income = np.abs(incomeData.loc[16,column])
@@ -195,20 +195,25 @@ def getRate(bank):
 					netProfitYearly[year] = netProfit
 					#print(bank,year, income,interest, res)
 						
+		else:
+			print("something wrong happens")
 
-		if ("Chi phí lãi" in incomeData.iloc[1,0] and "Tổng lợi nhuận trước thuế" in incomeData.iloc[17,0] and "Lợi nhuận sau thuế" in incomeData.iloc[21,0]):
-			for year in years:
-				if year in column:
-					income = np.abs(incomeData.loc[17,column])
-					netProfit = np.abs(incomeData.loc[21,column])
-					interest = np.abs(incomeData.loc[1,column])
-					ebit = income + interest
-					res = ebit*(1-tax)
-					bankEbitDict[year]=res
-					bankEbit.append(res)
-					netProfitDict[year] = netProfit
+		# if ("Chi phí lãi" in incomeData.iloc[1,0] and "Tổng lợi nhuận trước thuế" in incomeData.iloc[17,0] and "Lợi nhuận sau thuế" in incomeData.iloc[21,0]):
+		# 	for year in years:
+		# 		if year in column:
+		# 			income = np.abs(incomeData.loc[17,column])
+		# 			netProfit = np.abs(incomeData.loc[21,column])
+		# 			interest = np.abs(incomeData.loc[1,column])
+		# 			ebit = income + interest
+		# 			res = ebit*(1-tax)
+		# 			bankEbitDict[year]=res
+		# 			bankEbit.append(res)
+		# 			netProfitDict[year] = netProfit
 
+		# else:
+		# 	print("something wrong happens")
 
+	#print(bankEbitDict.values())
 	# Tang truong tung nam				
 	rateYearly={}
 	if all(res is not None for res in bankEbitDict.values()) and all(net is not None for net in netProfitDict.values()):
@@ -269,7 +274,7 @@ def getRate(bank):
 	#Cách biệt giữa ROE và chi phí vốn Chủ sở hữu
 	latestROAE = list(roaeYearly.values())[0]
 	diffRE = latestROAE - (CEO*100)
-	bankDiffRE[bank].append(diffRE)
+	bankDiffRE[bank].append(ceil(diffRE,2))
 
 	#Chi phí chi phí vốn của doanh nghiệp, WACC từng năm 
 	#WACC = (CP vốn VCSH * % vốn CSH) + (CP vốn vay * % vốn vay * (1 – thuế)) 
@@ -470,8 +475,8 @@ def getRate(bank):
 
 #vcb = financial_report (symbol= "MFS", report_type='BalanceSheet', frequency='yearly')
 # mwgcash = financial_report (symbol= "MWG", report_type='cashflow', frequency='yearly')
-# mwgbal = financial_report (symbol= "MWG", report_type='BalanceSheet', frequency='yearly')
-# print(mwgcash)
+#mwgbal = financial_report (symbol= "MWG", report_type='IncomeStatement', frequency='yearly')
+#print(mwgbal)
 # print(mwgcash.loc[22][0],mwgcash.loc[22][9])
 # print(mwgcash.loc[23][0],mwgcash.loc[23][9])
 
@@ -487,7 +492,6 @@ if __name__ == "__main__":
 	
 	code = args.code
 	getRate(code)
-
 
 
 
