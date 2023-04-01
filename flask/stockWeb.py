@@ -7,8 +7,8 @@ app=Flask(__name__,template_folder='template')
 
 @app.route('/')
 def index():
-    years_from = ["2013","2014","2015","2016","2017","2018","2019","2020","2021"]
-    years_to = ["2013","2014","2015","2016","2017","2018","2019","2020","2021"]
+    years_from = ["2013","2014","2015","2016","2017","2018","2019","2020","2021","2022"]
+    years_to = ["2013","2014","2015","2016","2017","2018","2019","2020","2021","2022"]
     return render_template('form.html', years_from=years_from, years_to=years_to)
 
 def remove_chars(values):
