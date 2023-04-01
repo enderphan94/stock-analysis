@@ -7,7 +7,9 @@ app=Flask(__name__,template_folder='template')
 
 @app.route('/')
 def index():
-    return render_template('form.html')
+    years_from = ["2013","2014","2015","2016","2017","2018","2019","2020","2021"]
+    years_to = ["2013","2014","2015","2016","2017","2018","2019","2020","2021"]
+    return render_template('form.html', years_from=years_from, years_to=years_to)
 
 def remove_chars(values):
     if isinstance(values, list):
@@ -21,10 +23,15 @@ def remove_chars(values):
 def submit():
     # Get the user input from the form
     user_input = request.form['user_input']
+    fromYear = request.form['years_from']
+    toYear = request.form['years_to']
+    # Periods:
     
+
+
+
     # Call the Python script with the user input as an argument
-    cmd = ['python3', 'smain.py','--code', user_input]
-    #result = subprocess.check_output(command)
+    cmd = ['python3', 'getData.py','--code', user_input,'--fr',fromYear,'--to',toYear]
     
     # Display the result to the user
     

@@ -81,17 +81,60 @@
       input[type="submit"]:hover {
         background-color: #b393d3;
       }
-    </style>
-    <title>VN STOCK</title>
+
+      .year-selects {
+      display: inline-block;
+      font-family: -apple-system,system-ui,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+      }
+      .year-selects label,
+      .year-selects select {
+      display: inline-block;
+      }
+      .year-selects select {
+        margin-left: 5px;
+        margin-right: 25px;
+            background: linear-gradient(to bottom, #ffffff, #f2f2f2); /* Use a gradient background */
+            border: none; /* Remove the border */
+    padding: 10px; 
+
+      }
+</style>  <title>VN STOCK</title>
 </head>
 
 <body>
     <h1>VN STOCK</h1>
-    <form method="post" action="/submit">
+    <form action="/submit" method="post" onsubmit="return validateForm()">
         <label for="user_input"></label>
         <input type="text" name="user_input" id="user_input">
+        <div class="year-selects">
+            <label for="years_from">From year:</label>
+            <select name="years_from" id="years_from">
+                {% for year in years_from %}
+                <option value="{{year}}" {% if year==selected_from %}selected{% endif %}>{{year}}</option>
+                {% endfor %}
+            </select>
+            <label for="years_to">To year:</label>
+            <select name="years_to" id="years_to">
+                {% for year in years_to %}
+                <option value="{{year}}" {% if year==selected_to %}selected{% endif %}>{{year}}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <br>
+        <br>
         <button type="submit" class="button-62">Go!</button>
     </form>
+    <script>
+    function validateForm() {
+        var years_from = parseInt(document.getElementById("years_from").value);
+        var years_to = parseInt(document.getElementById("years_to").value);
+        if (years_to - years_from != 5) {
+            alert("The period selected must be exactly 5 years");
+            return false;
+        }
+        return true;
+    }
+    </script>
 </body>
 
 </html>

@@ -22,7 +22,7 @@ retail_code = ["AAT","BSC","ABR","AMD","BTT","DGW","MWG","PET","PIV","PIT","IBC"
 #bank_code = ["CTG","BID","VCB","VIB","MBB","TCB","HDB","STB"]
 #retail_code = ["AAT","FRT"]
 single_code = ["BSC","AAT"]
-years = ["2016","2017","2018","2019","2020","2021"]
+yearList = ["2013","2014","2015","2016","2017","2018","2019","2020","2021"]
 
 # bank: 17, CPLV: 1
 #MWG: 16, CPLV:7
@@ -38,10 +38,18 @@ tax = 0.2
 
 directory = 'data/2023/'
 
-def getRate(bank, period):
+def getRate(bank,period, fr, to):
 	global CEO
 	global tax
 	global directory
+
+	if fr not in yearList and to not in yearList:
+		raise ValueError(f"Year {fr} is not in the list of valid years")
+
+	years = yearList[yearList.index(fr): yearList.index(to)+1]
+	
+	if len(years) != 6:
+			raise ValueError("period issue")
 
 	classA = defaultdict(list)
 	classB = defaultdict(list)
@@ -487,7 +495,8 @@ if __name__ == "__main__":
 
 	parser = argparse.ArgumentParser(description='Process some integers.')
 	parser.add_argument('--code', type=str, help='a company code')
-	parser.add_argument('--type', type=str, help='Yearly/Quarterly')
+	parser.add_argument('--fr', type=str, help='from year')
+	parser.add_argument('--to', type=str, help='to year')
 	try:
 		args = parser.parse_args()
 	except argparse.ArgumentError as e:
@@ -495,8 +504,9 @@ if __name__ == "__main__":
 		sys.exit(1)
 	
 	code = args.code
-	period = args.type
-	getRate(code,period)
+	fromYear = args.fr
+	toYear = args.to
+	getRate(code,'Yearly',fromYear,toYear)
 
 
 
