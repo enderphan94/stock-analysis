@@ -1,3 +1,5 @@
+#THIS VERSION IS NOT USING VNSTOCK
+
 import pandas as pd
 import numpy as np
 import math
@@ -75,25 +77,7 @@ def getRate(bank, period):
 	incomeData = pd.read_csv(incomeDataDir,index_col=0)
 	balanceData = pd.read_csv(balanceDataDir,index_col=0)
 	cashData = pd.read_csv(cashDataDir,index_col=0)
-	
-	#print(cashData)
-	# for column in balanceData.columns:
-	# 	if("Vay ngắn hạn" in balanceData.iloc[73,0]):
-	# 		for year in years:
-	# 			if year in column:
-	# 				print(year)
-	# 				shortLoan = np.abs(balanceData.loc[73,column])
-	# 				print(shortLoan)
-	#print(balanceData.loc[75][0])
-	#print(balanceData.loc[75][0],"\n", balanceData.loc[88][0],"\n", balanceData.loc[95][0],"\n", balanceData.loc[1][0],"\n", balanceData.loc[65][0]\
-	#	,"\n", cashData.loc[22][0],"\n", cashData.loc[23][0],"\n", cashData.loc[3][0])
 
-	# print(cashData)
-
-	# balanceData = financial_report (symbol= bank, report_type='BalanceSheet', frequency='yearly')
-	# cashData = financial_report (symbol= bank, report_type='cashflow', frequency='yearly')
-
-	#print(incomeData.loc[7][0],incomeData.loc[16][0], incomeData.loc[20][0])
 
 	shortLoanYears={}
 	shortDebtYears={}
@@ -119,29 +103,29 @@ def getRate(bank, period):
 			for year in years:
 				if year in column:
 					# Co cau Von
-					shortLoan = np.abs(balanceData.loc[75,column])
+					shortLoan = balanceData.loc[75,column]
 					shortLoanYears[year]= shortLoan
 
-					longloan = np.abs(balanceData.loc[88,column])
+					longloan = balanceData.loc[88,column]
 					totalLoan = shortLoan + longloan
 					totalDebt[year] = totalLoan
 
-					equity = np.abs(balanceData.loc[95,column])
+					equity = balanceData.loc[95,column]
 					totalEquity[year] = equity
 
-					shortAsset = np.abs(balanceData.loc[1,column])
+					shortAsset = balanceData.loc[1,column]
 					shortAssetYears[year] = shortAsset
 
-					shortDebt = np.abs(balanceData.loc[65,column])
+					shortDebt = balanceData.loc[65,column]
 					shortDebtYears[year] = shortDebt
 
 					buyAsset = np.abs(cashData.loc[22,column])
 					buyAssetYears[year] = buyAsset
 
-					liqAsset = np.abs(cashData.loc[23,column])
+					liqAsset = cashData.loc[23,column]
 					liqAssetYears[year] = liqAsset
 
-					depreData = np.abs(cashData.loc[3, column])
+					depreData = cashData.loc[3, column]
 					depreDataYears[year] = depreData
 
 
@@ -207,8 +191,8 @@ def getRate(bank, period):
 		if ("Chi phí lãi vay" in incomeData.loc[7][0] and "ròng trước thuế" in incomeData.loc[16][0] and "thuần sau thuế" in incomeData.loc[20][0]):
 			for year in years:
 				if year in column:
-					income = np.abs(incomeData.loc[16,column])
-					netProfit = np.abs(incomeData.loc[20,column])
+					income = incomeData.loc[16,column]
+					netProfit = incomeData.loc[20,column]
 					interest = np.abs(incomeData.loc[7,column])
 					ebit = income + interest
 					res = ebit*(1-tax)
@@ -296,7 +280,6 @@ def getRate(bank, period):
 	bankROAEYears[bank].append(roaeYearly)
 
 	#Cách biệt giữa ROE và chi phí vốn Chủ sở hữu
-	print(roaeYearly)
 	latestROAE = list(roaeYearly.values())[0]
 	diffRE = latestROAE - (CEO*100)
 	bankDiffRE[bank].append(ceil(diffRE,2))
@@ -440,7 +423,7 @@ def getRate(bank, period):
 	fastGrowthRate = ceil(fastGrowthRate,2)
 	fastGrowthRateDict[bank].append(fastGrowthRate)
 
-	# PRINT DATA HERE
+	# PRINT DATA HERE, I'm lazy to change this, fuck it!
 	for name, rate in ebitData.items():
 		for x,y in bankRate.items():
 			for i,j in profitData.items():
@@ -514,7 +497,6 @@ if __name__ == "__main__":
 	code = args.code
 	period = args.type
 	getRate(code,period)
-	#getFile("DGW")
 
 
 
