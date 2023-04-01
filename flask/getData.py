@@ -1,11 +1,10 @@
-from vnstock import *
 import pandas as pd
 import numpy as np
 import math
 from collections import defaultdict
 import json
 import argparse
-
+import os
 
 pd.set_option('display.max_rows', 500)
 pd.set_option('display.max_columns', 500)
@@ -35,9 +34,13 @@ allClasses = defaultdict(list)
 CEO = 0.15 # chi phí VCSH
 tax = 0.2
 
-def getRate(bank):
+directory = 'data/2023/'
+
+def getRate(bank, period):
 	global CEO
 	global tax
+	global directory
+
 	classA = defaultdict(list)
 	classB = defaultdict(list)
 	bankRate = defaultdict(list)
@@ -64,11 +67,33 @@ def getRate(bank):
 	totalReinvestAvDict=defaultdict(list)
 	fastGrowthRateDict=defaultdict(list)
 
-	incomeData = financial_report (symbol= bank, report_type='IncomeStatement', frequency='yearly')
-	balanceData = financial_report (symbol= bank, report_type='BalanceSheet', frequency='yearly')
-	cashData = financial_report (symbol= bank, report_type='cashflow', frequency='yearly')
 
-	#dict
+	incomeDataDir = directory + code + "/" + code + "_IncomeData_" + period + ".csv"
+	balanceDataDir = directory + code + "/" + code + "_BalanceData_" + period + ".csv"
+	cashDataDir = directory + code + "/" + code + "_CashData_" + period + ".csv"
+
+	incomeData = pd.read_csv(incomeDataDir,index_col=0)
+	balanceData = pd.read_csv(balanceDataDir,index_col=0)
+	cashData = pd.read_csv(cashDataDir,index_col=0)
+	
+	#print(cashData)
+	# for column in balanceData.columns:
+	# 	if("Vay ngắn hạn" in balanceData.iloc[73,0]):
+	# 		for year in years:
+	# 			if year in column:
+	# 				print(year)
+	# 				shortLoan = np.abs(balanceData.loc[73,column])
+	# 				print(shortLoan)
+	#print(balanceData.loc[75][0])
+	#print(balanceData.loc[75][0],"\n", balanceData.loc[88][0],"\n", balanceData.loc[95][0],"\n", balanceData.loc[1][0],"\n", balanceData.loc[65][0]\
+	#	,"\n", cashData.loc[22][0],"\n", cashData.loc[23][0],"\n", cashData.loc[3][0])
+
+	# print(cashData)
+
+	# balanceData = financial_report (symbol= bank, report_type='BalanceSheet', frequency='yearly')
+	# cashData = financial_report (symbol= bank, report_type='cashflow', frequency='yearly')
+
+	#print(incomeData.loc[7][0],incomeData.loc[16][0], incomeData.loc[20][0])
 
 	shortLoanYears={}
 	shortDebtYears={}
@@ -88,8 +113,8 @@ def getRate(bank):
 	depreDataYears={}
 
 	for column in balanceData.columns:
-		if("Vay ngắn hạn" in balanceData.iloc[73,0] and "Vay dài hạn" in balanceData.iloc[86,0] and "VỐN CHỦ SỞ HỮU" in balanceData.iloc[91,0]\
-				and "TÀI SẢN NGẮN HẠN" in balanceData.iloc[1][0] and "Nợ ngắn hạn" in balanceData.loc[65][0] and "Tiền mua tài sản cố định và các tài sản dài hạn khác" in cashData.loc[22][0]\
+		if("Vay ngắn hạn" in balanceData.loc[75][0] and "Vay dài hạn" in balanceData.loc[88][0] and "VỐN CHỦ SỞ HỮU" in balanceData.loc[95][0]\
+				and "TÀI SẢN NGẮN HẠN" in balanceData.loc[1][0] and "Nợ ngắn hạn" in balanceData.loc[65][0] and "Tiền mua tài sản cố định và các tài sản dài hạn khác" in cashData.loc[22][0]\
 				 and "Tiền thu được từ thanh lý tài sản cố định" in cashData.loc[23][0] and "Khấu hao TSCĐ" in cashData.loc[3][0]):
 			for year in years:
 				if year in column:
@@ -123,7 +148,6 @@ def getRate(bank):
 					
 		else:
 			print("something wrong happens")
-	
 	
 	# Tong vay binh quan
 	if all(debt is not None for debt in totalDebt.values()):
@@ -272,6 +296,7 @@ def getRate(bank):
 	bankROAEYears[bank].append(roaeYearly)
 
 	#Cách biệt giữa ROE và chi phí vốn Chủ sở hữu
+	print(roaeYearly)
 	latestROAE = list(roaeYearly.values())[0]
 	diffRE = latestROAE - (CEO*100)
 	bankDiffRE[bank].append(ceil(diffRE,2))
@@ -473,19 +498,13 @@ def getRate(bank):
 	result = json.dumps(classA, indent=4)
 	print(result)
 
-#vcb = financial_report (symbol= "MFS", report_type='BalanceSheet', frequency='yearly')
-# mwgcash = financial_report (symbol= "MWG", report_type='cashflow', frequency='yearly')
-mwgbal = financial_report (symbol= "MWG", report_type='cashflow', frequency='yearly')
-#print(mwgbal)
-DGWbal = financial_report (symbol= "DGW", report_type='cashflow', frequency='yearly')
-#print(DGWbal)
-print(mwgbal.loc[21][0])
-print(DGWbal.loc[21][0])
+
 
 if __name__ == "__main__":
 
 	parser = argparse.ArgumentParser(description='Process some integers.')
-	parser.add_argument('--code', type=str, help='an integer argument')
+	parser.add_argument('--code', type=str, help='a company code')
+	parser.add_argument('--type', type=str, help='Yearly/Quarterly')
 	try:
 		args = parser.parse_args()
 	except argparse.ArgumentError as e:
@@ -493,7 +512,9 @@ if __name__ == "__main__":
 		sys.exit(1)
 	
 	code = args.code
-	#getRate(code)
+	period = args.type
+	getRate(code,period)
+	#getFile("DGW")
 
 
 
