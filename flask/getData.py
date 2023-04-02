@@ -37,7 +37,7 @@ tax = 0.2
 
 directory = 'data/2023/'
 
-def getRate(bank,period, fr, to):
+def getRate(bank,period, fr, to, growth):
 	global CEO
 	global tax
 	global directory
@@ -49,6 +49,7 @@ def getRate(bank,period, fr, to):
 	
 	if len(years) != 6:
 			raise ValueError("period issue")
+
 
 	classA = defaultdict(list)
 	classB = defaultdict(list)
@@ -451,19 +452,41 @@ def getRate(bank,period, fr, to):
 	freeCashFuture={}
 	pVCashFlowFuture={}
 
+	delimiter = ","
+	growthList = growth.split(delimiter)
+
+	if len(growthList) != 10:
+			raise ValueError("You should enter the growth value for the next 10 years")
+	
 	futureData=defaultdict(list)
-	futureData["2023"].append({1:0.15})
-	futureData["2024"].append({2:0.15})
-	futureData["2025"].append({3:0.15})
-	futureData["2026"].append({4:0.15})
-	futureData["2027"].append({5:0.15})
-	futureData["2028"].append({6:0.1308})
-	futureData["2029"].append({7:0.1117})
-	futureData["2030"].append({8:0.0925})
-	futureData["2031"].append({9:0.0733})
-	futureData["2032"].append({10:0.0542})
-	futureData["2033"].append({11:0.035})
-	futureData["2034"].append({0:0.035})
+	no = 1
+	now = int(to) + 1
+	for i in range(len(growthList)):
+		futureData[str(now)].append({no:(float(growthList[i])/100)})
+		no = no + 1
+		now = now + 1
+
+
+	lastYear = list(futureData.keys())[-1]
+	nextYear = int(lastYear) + 1
+	finalYear = nextYear +1
+
+	futureData[nextYear].append({11:0.035})
+	futureData[finalYear].append({0:0.035})
+
+	print(futureData)
+	# futureData["2023"].append({1:0.15})
+	# futureData["2024"].append({2:0.15})
+	# futureData["2025"].append({3:0.15})
+	# futureData["2026"].append({4:0.15})
+	# futureData["2027"].append({5:0.15})
+	# futureData["2028"].append({6:0.1308})
+	# futureData["2029"].append({7:0.1117})
+	# futureData["2030"].append({8:0.0925})
+	# futureData["2031"].append({9:0.0733})
+	# futureData["2032"].append({10:0.0542})
+	# futureData["2033"].append({11:0.035})
+	# futureData["2034"].append({0:0.035})
 
 	ebitLatest = bankEbitDict[to]
 		#Lợi nhuận trước lãi vay sau thuế, EBIT*(1-Tc)
@@ -646,6 +669,7 @@ if __name__ == "__main__":
 	parser.add_argument('--code', type=str, help='a company code')
 	parser.add_argument('--fr', type=str, help='from year')
 	parser.add_argument('--to', type=str, help='to year')
+	parser.add_argument('--growth', type=str, help='predicted growths in the next 10 years separated by comma')
 	try:
 		args = parser.parse_args()
 	except argparse.ArgumentError as e:
@@ -655,7 +679,8 @@ if __name__ == "__main__":
 	code = args.code
 	fromYear = args.fr
 	toYear = args.to
-	getRate(code,'Yearly',fromYear,toYear)
+	growth = args.growth
+	getRate(code,'Yearly',fromYear,toYear, growth)
 
 
 
