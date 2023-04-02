@@ -102,11 +102,15 @@ def getRate(bank,period, fr, to):
 	buyAssetYears={}
 	liqAssetYears={}
 	depreDataYears={}
+	cashYears={}
+	uncontrolledEquityYears={}
+	commonStockYears={}
 
 	for column in balanceData.columns:
 		if("Vay ngắn hạn" in balanceData.loc[75][0] and "Vay dài hạn" in balanceData.loc[88][0] and "VỐN CHỦ SỞ HỮU" in balanceData.loc[95][0]\
 				and "TÀI SẢN NGẮN HẠN" in balanceData.loc[1][0] and "Nợ ngắn hạn" in balanceData.loc[65][0] and "Tiền mua tài sản cố định và các tài sản dài hạn khác" in cashData.loc[22][0]\
-				 and "Tiền thu được từ thanh lý tài sản cố định" in cashData.loc[23][0] and "Khấu hao TSCĐ" in cashData.loc[3][0]):
+				 and "Tiền thu được từ thanh lý tài sản cố định" in cashData.loc[23][0] and "Khấu hao TSCĐ" in cashData.loc[3][0] and "Tiền và tương đương tiền cuối kỳ" in cashData.loc[40][0])\
+					and "Lợi ích cổ đông không kiểm soát" in balanceData.loc[113][0] and "Cổ phiếu phổ thông" in balanceData.loc[98][0]:
 			for year in years:
 				if year in column:
 					# Co cau Von
@@ -134,6 +138,15 @@ def getRate(bank,period, fr, to):
 
 					depreData = cashData.loc[3, column]
 					depreDataYears[year] = depreData
+
+					cash = cashData.loc[40,column]
+					cashYears[year] = cash
+
+					uncontrolledEquity= balanceData.loc[113,column]
+					uncontrolledEquityYears[year] = uncontrolledEquity
+
+					commonStock = balanceData.loc[98,column]
+					commonStockYears[year] = commonStock
 
 
 					
@@ -430,6 +443,135 @@ def getRate(bank,period, fr, to):
 	fastGrowthRate = ceil(fastGrowthRate,2)
 	fastGrowthRateDict[bank].append(fastGrowthRate)
 
+	
+	# Ngân Lưu
+	ebitFurure={}
+	reinvestFuture={}
+	proReinvestFuture={}
+	freeCashFuture={}
+	pVCashFlowFuture={}
+
+	futureData=defaultdict(list)
+	futureData["2023"].append({1:0.15})
+	futureData["2024"].append({2:0.15})
+	futureData["2025"].append({3:0.15})
+	futureData["2026"].append({4:0.15})
+	futureData["2027"].append({5:0.15})
+	futureData["2028"].append({6:0.1308})
+	futureData["2029"].append({7:0.1117})
+	futureData["2030"].append({8:0.0925})
+	futureData["2031"].append({9:0.0733})
+	futureData["2032"].append({10:0.0542})
+	futureData["2033"].append({11:0.035})
+	futureData["2034"].append({0:0.035})
+
+	ebitLatest = bankEbitDict[to]
+		#Lợi nhuận trước lãi vay sau thuế, EBIT*(1-Tc)
+	for year, growth in futureData.items():
+		for dictionary in growth:
+			for no, percent in dictionary.items():
+				ebit = ebitLatest*(1+percent)
+				ebitLatest = ebit
+				ebitFurure[year] = ebit
+
+		#Tỷ lệ tái đầu tư
+	for year, growth in futureData.items():
+		for dictionary in growth:
+			for no, percent in dictionary.items():
+				proReInvest = ((percent*100)/roceAv)*100
+				proReinvestFuture[year] = ceil(proReInvest,2)
+
+		#Tái Đầu Tư
+	for year, ebit in ebitFurure.items():
+		for y, pro in proReinvestFuture.items():
+			if year == y:
+				reInvest = ebit * (pro/100)
+				reinvestFuture[year]=reInvest
+
+		#Dòng tiền tự do = Lợi nhuận trước lãi vay sau thuế - Tái đầu tư 
+	for year, ebit in ebitFurure.items():
+		for y, reInvest in reinvestFuture.items():
+			if year == y:
+				freeCash = ebit - reInvest
+				freeCashFuture[year] = freeCash
+	
+	#print(freeCashFuture)
+	#print(waccAv)
+	for year, growth in futureData.items():
+		for y, cash in freeCashFuture.items():
+			if year == y:
+				for dictionary in growth:
+					for no, percent in dictionary.items():
+						#print(year, cash, waccAv/100, no)
+						pv = div(cash,(1+(waccAv/100))**no)
+						pVCashFlowFuture[year]=pv
+
+	#lastYearItem = list(pVCashFlowFuture.keys())[-1]
+	#pVCashFlowFuture.pop(lastYearItem)
+
+	# print(ebitFurure,"\n")
+	# print("ti le tai dau tu",proReinvestFuture,"\n")
+	# print("tai dau tu",reinvestFuture,"\n")
+	# print("dong tien tu do",freeCashFuture,"\n")
+	# print("gia tri hien tai",pVCashFlowFuture,"\n")
+
+	# Tổng GTHT của dòng tiền
+	terminalValueYearly={}
+
+	totalPV = sum(list(pVCashFlowFuture.values())[:-1]) #sum tat ca tru nam cuoi cung
+
+
+	data10 = dict(list(futureData.values())[10][0]).keys()
+	no10 = list(data10)[0]
+
+	cashFlow11 = list(freeCashFuture.values())[11]
+
+	for year, growth in futureData.items():
+		for y, cash in freeCashFuture.items():
+			if year == y:
+				for dictionary in growth:
+					for no, percent in dictionary.items():
+						#print(year, cash, waccAv/100, percent)
+						tm = div(cash,div((ceil(waccAv,2)-(percent*100)),100))
+						terminalValueYearly[year]=tm
+
+	terminalValue = list(terminalValueYearly.values())[11]
+
+	pVTerminalValue = div(terminalValue,(1+(waccAv/100))**no10)
+
+
+
+	
+	totalAllCashFlow = totalPV + pVTerminalValue
+	cashYearLatest = cashYears[to]
+	totalDebtLatest = totalDebt[to]
+	equityLatest = totalEquity[to]
+	uncontrollELatest = uncontrolledEquityYears[to]
+	commonStockLatest= commonStockYears[to]
+
+	companyValue = totalAllCashFlow+cashYearLatest
+
+	# Giá trị doanh nghiệp hợp nhất - sau nợ 
+	companyValueAfterDebt = companyValue - totalDebtLatest
+
+	#% của cổ đông công ty
+	perShares = (1-(div(uncontrollELatest,equityLatest)))*100
+	perShares = ceil(perShares,2)
+
+	# Giá trị doanh nghiệp dành cho cổ đông
+	companyValueForShares = companyValueAfterDebt * (perShares/100)
+	#print(companyValueForShares,commonStockLatest)
+
+	# Giá trị nội tại/1 cổ phần
+	instinctValue = companyValueForShares/(commonStockLatest/10)
+	#print(instinctValue, companyValueForShares,commonStockLatest )
+	# print("VCSH",equityLatest)
+	# print("VCSH-non",uncontrollELatest)
+	# print("perShares",perShares)
+	# print("commonStock",commonStockLatest)
+	# print("GTHT",pVTerminalValue)
+	# print("totalAllCashFlow", totalAllCashFlow)
+
 	# PRINT DATA HERE, I'm lazy to change this, fuck it!
 	for name, rate in ebitData.items():
 		for x,y in bankRate.items():
@@ -482,7 +624,15 @@ def getRate(bank,period, fr, to):
 				if btotalreinvestav == bfastgrowth:
 					classA["Tỷ lệ tái đầu tư (Bình quân) "].append(vtotalreinvestav)
 					classA["Tốc độ tăng trưởng giai đoạn nhanh (Tỷ lệ tái đầu tư * Tỷ suất sinh lợi trên vốn)"].append(vfastgrowth)												
-									
+	
+	classA["Giá trị hiện tại của tất cả dòng tiền tự do"].append(pVTerminalValue)
+	classA["Giá trị tiền mặt"].append(cashYearLatest)
+	classA["Giá trị Doanh Nghiệp"].append(companyValue)
+	classA["Giá trị doanh nghiệp hợp nhất - sau nợ"].append(companyValueAfterDebt)
+	classA["\% của cổ đông công ty"].append(perShares)
+	classA["Giá trị doanh nghiệp dành cho cổ đông"].append(companyValueForShares)
+	classA["Giá trị nội tại/1 cổ phần"].append(instinctValue)
+
 
 	#allClasses[bank] = classA
 	result = json.dumps(classA, indent=4)

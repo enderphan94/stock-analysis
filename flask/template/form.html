@@ -69,6 +69,8 @@
         border: 2px solid #ccc;
         border-radius: 4px;
         resize: none;
+        font-family:Courier;
+        font-size: 16px;
       }
       input[type="submit"] {
         background-color: #b393d3;
@@ -85,6 +87,7 @@
       .year-selects {
       display: inline-block;
       font-family: -apple-system,system-ui,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+      font-size: 16px;
       }
       .year-selects label,
       .year-selects select {
@@ -114,8 +117,8 @@
 <body>
     <h1>VN STOCK</h1>
     <form action="/submit" method="post" onsubmit="return validateForm()">
-        <input type="text" name="user_input" id="user_input" value="Enter code here">
-        <div class="error-message" id="error-message" style="display: none;">Error: Please enter a company code</div>
+        <input type="text" name="user_input" id="user_input" value="Mã Chứng Khoán">
+        <div class="error-message" id="error-message" style="display: none;">Error: Mã Chứng Khoán Không Tồn Tại!!!</div>
 
         <div class="year-selects">
             <label for="years_from">From year:</label>
@@ -131,7 +134,7 @@
                 {% endfor %}
             </select>
         </div>
-        <div class="error-message" id="error-message-year" style="display: none;">Error: The priod should be 5 years</div>
+        <div class="error-message" id="error-message-year" style="display: none;">Error: Khoảng thời gian phải trong 5 năm!!!</div>
         <br>
         <br>
         <button type="submit" class="button-62">Go!</button>
@@ -146,7 +149,7 @@
         const userInput = document.getElementById("user_input");
 
         userInput.addEventListener('click', () => {
-          if (userInput.value === "Enter code here") {
+          if (userInput.value === "Mã Chứng Khoán") {
             userInput.value = '';
           }
         });
