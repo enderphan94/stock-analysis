@@ -1,0 +1,518 @@
+<html>
+
+<head>
+    <title>My Website</title>
+    <style>
+        h1 {
+        font-size: 70px;
+        font-weight: 600;
+        font-family: -apple-system,system-ui,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+        background-image: linear-gradient(to left, #EF4765, #553c9a);
+        color: transparent;
+        background-clip: text;
+        -webkit-background-clip: text;
+        text-align: center;
+      }
+        /* button styles */
+        .button-62 {
+            background: linear-gradient(to bottom right, #EF4765, #553c9a);
+            border: 0;
+            border-radius: 12px;
+            color: #FFFFFF;
+            cursor: pointer;
+            display: inline-block;
+            font-family: -apple-system, system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-size: 16px;
+            font-weight: 500;
+            line-height: 2.5;
+            outline: transparent;
+            padding: 0 1rem;
+            text-align: center;
+            text-decoration: none;
+            transition: box-shadow .2s ease-in-out;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+            white-space: nowrap;
+        }
+
+        .button-62:not([disabled]):focus {
+            box-shadow: 0 0 .25rem rgba(0, 0, 0, 0.5), -.125rem -.125rem 1rem rgba(239, 71, 101, 0.5), .125rem .125rem 1rem rgba(255, 154, 90, 0.5);
+        }
+
+        .button-62:not([disabled]):hover {
+            box-shadow: 0 0 .25rem rgba(0, 0, 0, 0.5), -.125rem -.125rem 1rem rgba(239, 71, 101, 0.5), .125rem .125rem 1rem rgba(255, 154, 90, 0.5);
+        }
+
+        button:hover {
+            background-color: #b393d3;
+            /* set the background color on hover */
+        }
+
+        .container {
+            display: flex;
+            justify-content: center;
+            margin-top: 50px;
+        }
+
+        .buttons-container {
+            display: flex;
+            justify-content: space-between;
+            width: 200px;
+        }
+
+        button:first-child {
+            margin-right: 10px;
+        }
+
+        button:last-child {
+            margin-left: 10px;
+        }
+
+        /* form styles */
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            color: #444;
+        }
+
+        input[type="text"],
+        textarea {
+            width: 100%;
+            margin-bottom: 20px;
+            margin-top: 20px;
+            /*        border: 2px solid #ccc;*/
+            border-radius: 4px;
+            resize: none;
+            font-family: Courier;
+            font-size: 16px;
+        }
+
+        input[type="submit"] {
+            background-color: #b393d3;
+            border: none;
+            color: #b393d3;
+            padding: 10px 20px;
+            font-size: 1.2em;
+            cursor: pointer;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #b393d3;
+        }
+
+        .form-popup {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            right: 0;
+            left: 0;
+            top: 0;
+            z-index: 9;
+            background-color: rgba(0, 0, 0, 0.5);
+            background-color: #fff;
+
+        }
+
+        .form-container {
+            display: flex;
+            flex-direction: column;
+            /* background-color: #fefefe; */
+            margin: 5% auto;
+            /* padding: 20px; */
+            /* border: 1px solid #888; */
+            /* width: 80%; */
+            max-width: 500px;
+            position: relative;
+            animation-name: slide-in;
+            animation-duration: 0.5s;
+            animation-timing-function: ease-out;
+            animation-fill-mode: forwards;
+            top: -50%;
+            border: 2px solid #fff;
+            border-radius: 15px 15px 15px 15px;
+            padding: 20px;
+            width: 500px;
+            /* margin: 0 auto; */
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.60);
+        }
+
+        /* close button styles */
+        .close {
+            position: absolute;
+            top: 2px;
+            right: 5px;
+            color: #aaaaaa;
+            font-size: 30px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: #000;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        /* animations */
+        @keyframes slide-in {
+            0% {
+                top: -50%;
+            }
+
+            100% {
+                top: 0;
+            }
+        }
+
+        .year-selects {
+            display: inline-block;
+            font-family: -apple-system, system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-size: 16px;
+        }
+
+        .year-selects label,
+        .year-selects select {
+            display: inline-block;
+        }
+
+        .year-selects select {
+            margin-left: 5px;
+            margin-right: 25px;
+            background: linear-gradient(to bottom, #ffffff, #f2f2f2);
+            /* Use a gradient background */
+            border: none;
+            /* Remove the border */
+            padding: 10px;
+
+        }
+
+        .years-future label,
+        .years-future input {
+            display: inline-block;
+        }
+
+        .years-future input {
+            width: 40%;
+        }
+
+        .wrapper {
+            text-align: center;
+            display: flex;
+            justify-content: center;
+        }
+
+        blockquote {
+            position: relative;
+            /* background: #ddd; */
+        }
+
+        blockquote:before {
+            /* position: absolute; */
+            content: open-quote;
+            font-size: 4em;
+            margin-left: -0.6em;
+            margin-top: -0.4em;
+        }
+
+        blockquote:after {
+            /* position: absolute; */
+            content: close-quote;
+            font-size: 4em;
+            bottom: 0;
+            right: 0;
+            margin-right: -0.6em;
+            margin-bottom: -0.8em;
+        }
+
+        blockquote p {
+            display: inline;
+        }
+
+        p {
+            text-align: left;
+            font-size: 2.125rem;
+            font-style: italic;
+        }
+
+        .error-message {
+            background-color: #ffe3e3;
+            border: 1px solid #ff7b7b;
+            border-radius: 5px;
+            color: #ff7b7b;
+            font-size: 14px;
+            margin-bottom: 10px;
+            padding: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Tính Giá Trị Nội Tại Của Công Ty</h1>
+
+    <div class="container">
+        <div class="buttons-container">
+            <button class="button-62" onclick="openForm()">Đơn giản</button>
+            <button class="button-62" onclick="openFormSimple()">Nâng Cao</button>
+        </div>
+
+    </div>
+    <div class="wrapper">
+        <blockquote>
+            <p>Con người tính toán quá nhiều, nhưng lại suy nghĩ quá ít</p>
+        </blockquote>
+    </div>
+
+
+
+    <div class="form-popup" id="myForm">
+		<div class="form-container">
+			<span class="close" onclick="closeForm()">&times;</span>
+			<form action="/submit" method="post" onsubmit="return validateFormSimple()" id="simpleForm">
+                <input type="text" name="user_input_simple" id="user_input_simple" value="Mã Chứng Khoán">
+                <div class="error-message" id="error-message-bank-simple" style="display: none;">Error: Phần mềm chưa hỗ trợ tính giá trị nội tại cho Ngân Hàng!!!</div>
+                <div class="error-message" id="error-message-simple" style="display: none;">Error: Mã Chứng Khoán Không Tồn Tại!!!</div>
+                <br>
+                <label>Nhập dự đoán tăng trưởng trung bình của 5 năm tới:</label>
+                <div class="years-future">
+                  <label for="5years_label" id="5years_label">2023-2028:</label>
+                  <input type="text" name="5years" id="5years" required>
+                </div>
+                <div class="error-message" id="error-message-year-simple" style="display: none;">Error: Giá trị tăng trưởng
+                    không hợp lệ!!!</div>
+                <br>
+                <button type="submit" class="button-62">Go!</button>
+              </form>
+		</div>
+	</div>
+
+    <div class="form-popup" id="advanced">
+        <div class="form-container">
+            <span class="close" onclick="closeFormSimple()">&times;</span>
+            <form action="/submit" method="post" onsubmit="return validateFormAD()" id="advancedForm">
+                <input type="text" name="user_input" id="user_input" value="Mã Chứng Khoán" required>
+                <div class="error-message" id="error-message-bank" style="display: none;">Error: Phần mềm chưa hỗ trợ
+                    tính giá trị nội tại cho Ngân Hàng!!!</div>
+                <div class="error-message" id="error-message" style="display: none;">Error: Mã Chứng Khoán Không Tồn
+                    Tại!!!</div>
+
+                <br>
+                <label>Nhập dự đoán tăng trưởng của bạn:</label>
+                <div class="years-future">
+                    <label for="year1_label" id="year1_label">2023</label>
+                    <input type="text" name="year1" id="year1" required>
+
+                    <label for="year2_label" id="year2_label">2024</label>
+                    <input type="text" name="year2" id="year2" required>
+
+                    <label for="year3_label" id="year3_label">2025</label>
+                    <input type="text" name="year3" id="year3" required>
+
+                    <label for="year4_label" id="year4_label">2026</label>
+                    <input type="text" name="year4" id="year4" required>
+
+                    <label for="year5_label" id="year5_label">2027</label>
+                    <input type="text" name="year5" id="year5" required>
+
+                    <label for="year6_label" id="year6_label">2028</label>
+                    <input type="text" name="year6" id="year6" required>
+
+                    <label for="year7_label" id="year7_label">2029</label>
+                    <input type="text" name="year7" id="year7" required>
+
+                    <label for="year8_label" id="year8_label">2030</label>
+                    <input type="text" name="year8" id="year8" required>
+
+                    <label for="year9_label" id="year9_label">2031</label>
+                    <input type="text" name="year9" id="year9" required>
+
+                    <label for="year10_label" id="year10_label">2032</label>
+                    <input type="text" name="year10" id="year10" required>
+
+                </div>
+                <div class="error-message" id="error-message-year" style="display: none;">Error: Giá trị tăng trưởng
+                    không hợp lệ!!!</div>
+                <br>
+                <button type="submit" class="button-62">Go!</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openForm() {
+            document.getElementById("myForm").style.display = "block";
+        }
+
+        function closeForm() {
+            document.getElementById("myForm").style.display = "none";
+        }
+
+        function openFormSimple() {
+            document.getElementById("advanced").style.display = "block";
+        }
+
+        function closeFormSimple() {
+            document.getElementById("advanced").style.display = "none";
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            let avaiCode = ["AAA", "AAM", "AAT", "AAV", "ABB", "ABI", "ABR", "ABS", "ABT", "ACB", "ACC", "ACE", "ACL", "ACM", "ADC", "ADP", "AGF", "AGM", "AGR", "ALT", "ALV", "AMC", "AMD", "AME", "AMP", "AMV", "ANV", "APC", "APF", "APG", "API", "APL", "APP", "APS", "ARM", "ASA", "ASM", "ASP", "ATA", "ATB", "ATS", "AVF", "B82", "BBC", "BBH", "BBS", "BBT", "BCB", "BCC", "BCE", "BCG", "BCP", "BDB", "BDW", "BED", "BHA", "BHC", "BHK", "BHN", "BHP", "BHT", "BIC", "BID", "BII", "BKC", "BLF", "BMC", "BMD", "BMF", "BMI", "BMJ", "BMN", "BMP", "BOT", "BPC", "BRC", "BRS", "BSC", "BSI", "BST", "BT6", "BTG", "BTH", "BTN", "BTP", "BTS", "BTT", "BTU", "BTW", "BVG", "BVH", "BVN", "BVS", "BWA", "BXH", "C21", "C22", "C32", "C47", "C92", "CAD", "CAN", "CAP", "CAV", "CCI", "CCL", "CCM", "CCR", "CDC", "CDH", "CDO", "CEN", "CEO", "CFM", "CH5", "CHP", "CI5", "CID", "CIG", "CII", "CJC", "CKD", "CKV", "CLC", "CLG", "CLL", "CLW", "CMC", "CMG", "CMI", "CMP", "CMS", "CMT", "CMV", "CMX", "CNC", "CNG", "CNT", "COM", "CPC", "CPH", "CPI", "CSC", "CSM", "CSV", "CT3", "CT6", "CTA", "CTB", "CTC", "CTD", "CTF", "CTG", "CTI", "CTN", "CTP", "CTR", "CTS", "CTT", "CTW", "CTX", "CVN", "CVT", "CX8", "CYC", "D11", "D2D", "DAC", "DAD", "DAE", "DAG", "DAH", "DAP", "DAS", "DBC", "DBM", "DBT", "DC2", "DC4", "DCL", "DCM", "DCS", "DCT", "DDM", "DDN", "DDV", "DFF", "DGC", "DGT", "DGW", "DHA", "DHC", "DHG", "DHM", "DHP", "DHT", "DIC", "DID", "DIG", "DIH", "DL1", "DLD", "DLG", "DLR", "DMC", "DNC", "DNH", "DNL", "DNM", "DNN", "DNP", "DNT", "DPC", "DPM", "DPP", "DPR", "DPS", "DQC", "DRC", "DRH", "DRL", "DSN", "DST", "DSV", "DTA", "DTC", "DTE", "DTI", "DTL", "DTN", "DTT", "DTV", "DVC", "DVG", "DVP", "DVW", "DXG", "DXL", "DXP", "DXV", "DZM", "E1VFVN30", "EBS", "ECI", "EFI", "EIB", "EID", "ELC", "EMC", "EVE", "FBA", "FCM", "FCN", "FDC", "FID", "FIT", "FLC", "FMC", "FPT", "FRC", "FT1", "FTI", "FUEMAV30", "FUESSV30", "FUEVFVND", "FUEVN100", "G20", "GAS", "GDT", "GDW", "GER", "GGG", "GHC", "GIL", "GLC", "GLT", "GMA", "GMC", "GMD", "GMX", "GSM", "GSP", "GTA", "GTH", "GTT", "H11", "HAD", "HAG", "HAH", "HAI", "HAP", "HAR", "HAS", "HAT", "HAV", "HAX", "HBC", "HBD", "HBS", "HCC", "HCI", "HCM", "HCT", "HDA", "HDB", "HDC", "HDG", "HDM", "HDO", "HEJ", "HEP", "HEV", "HFC", "HFX", "HGM", "HHC", "HHG", "HHN", "HHS", "HIG", "HJS", "HKB", "HKP", "HKT", "HLA", "HLC", "HLD", "HLG", "HLR", "HLY", "HMC", "HMG", "HMH", "HNG", "HNM", "HOM", "HOT", "HPB", "HPD", "HPG", "HPH", "HPP", "HPT", "HQC", "HRB", "HRC", "HSA", "HSG", "HSI", "HT1", "HTC", "HTG", "HTI", "HTL", "HTP", "HTT", "HTV", "HU1", "HU3", "HU4", "HUT", "HVA", "HVG", "HVT", "HVX", "IBC", "ICC", "ICF", "ICG", "ICI", "IDI", "IDJ", "IDP", "IDV", "IFS", "IHK", "IJC", "ILA", "ILC", "IME", "IMP", "IN4", "INC", "INN", "IST", "ITA", "ITC", "ITD", "ITQ", "IVS", "JVC", "KAC", "KBC", "KCE", "KDC", "KDH", "KDM", "KHA", "KHL", "KHP", "KKC", "KLB", "KLF", "KMR", "KMT", "KPF", "KSB", "KSD", "KSH", "KSQ", "KSS", "KST", "KSV", "KTL", "KTS", "KTT", "KVC", "L10", "L14", "L18", "L35", "L43", "L44", "L61", "L62", "LAF", "LAS", "LAW", "LBC", "LBE", "LBM", "LCC", "LCD", "LCG", "LCM", "LCS", "LCW", "LDP", "LGC", "LGL", "LHC", "LHG", "LIG", "LIX", "LKW", "LM3", "LM7", "LM8", "LMH", "LO5", "LSS", "LTC", "LUT", "MAC", "MAS", "MBB", "MCC", "MCF", "MCG", "MCO", "MCP", "MDA", "MDC", "MDF", "MDG", "MEC", "MED", "MEF", "MFS", "MHC", "MHL", "MIC", "MIM", "MKP", "MKV", "MLC", "MPC", "MPT", "MPY", "MQB", "MSB", "MSN", "MST", "MTC", "MTG", "MTH", "MTL", "MTP", "MWG", "NAB", "NAF", "NAG", "NAP", "NAV", "NBB", "NBC", "NBP", "NBW", "NCS", "NCT", "ND2", "NDC", "NDF", "NDN", "NDX", "NET", "NFC", "NGC", "NHA", "NHC", "NHH", "NHP", "NKG", "NLG", "NLS", "NNC", "NNG", "NNT", "NOS", "NQB", "NQT", "NS2", "NSC", "NST", "NT2", "NTB", "NTC", "NTL", "NTP", "NTW", "NVB", "NVT", "NWT", "NXT", "OCB", "OCH", "OGC", "ONE", "ONW", "OPC", "ORS", "PAC", "PAN", "PAS", "PBP", "PCG", "PCM", "PCT", "PDB", "PDC", "PDN", "PDR", "PEC", "PEN", "PET", "PFL", "PGB", "PGC", "PGD", "PGI", "PGN", "PGS", "PGT", "PHC", "PHH", "PHP", "PHR", "PHS", "PIC", "PID", "PIT", "PIV", "PJC", "PJS", "PJT", "PLC", "PLE", "PMC", "PMJ", "PMS", "PMT", "PNC", "PND", "PNJ", "PNP", "POB", "POM", "POT", "POV", "PPC", "PPE", "PPI", "PPP", "PPS", "PRC", "PRO", "PSB", "PSC", "PSD", "PSE", "PSG", "PSI", "PSL", "PSP", "PTB", "PTC", "PTD", "PTG", "PTH", "PTI", "PTL", "PTP", "PTS", "PTT", "PV2", "PVA", "PVB", "PVC", "PVD", "PVE", "PVG", "PVI", "PVL", "PVR", "PVS", "PVT", "PVV", "PVX", "PX1", "PXA", "PXI", "PXL", "PXM", "PXS", "PXT", "QBS", "QCC", "QCG", "QHD", "QHW", "QNC", "QNT", "QNU", "QPH", "QST", "QTC", "RAL", "RCC", "RCD", "RCL", "RDP", "REE", "RIC", "S12", "S27", "S55", "S74", "S96", "S99", "SAF", "SAL", "SAM", "SAP", "SAS", "SAV", "SBA", "SBL", "SBS", "SBT", "SC5", "SCC", "SCD", "SCG", "SCI", "SCJ", "SCL", "SCO", "SCR", "SCY", "SD1", "SD2", "SD3", "SD4", "SD5", "SD6", "SD7", "SD8", "SD9", "SDA", "SDB", "SDC", "SDD", "SDG", "SDJ", "SDK", "SDN", "SDP", "SDT", "SDU", "SDV", "SDX", "SDY", "SEB", "SED", "SEP", "SFC", "SFG", "SFI", "SFN", "SGB", "SGC", "SGD", "SGH", "SGO", "SGR", "SGS", "SGT", "SHA", "SHB", "SHC", "SHG", "SHI", "SHN", "SHP", "SHS", "SHX", "SIC", "SII", "SJ1", "SJC", "SJD", "SJE", "SJF", "SJM", "SJS", "SKG", "SKN", "SLS", "SMA", "SMB", "SMC", "SMT", "SNC", "SPB", "SPC", "SPD", "SPH", "SPI", "SPM", "SQC", "SRA", "SRB", "SRC", "SRF", "SSC", "SSF", "SSG", "SSI", "SSM", "SSN", "ST8", "STB", "STC", "STG", "STL", "STP", "STS", "STT", "SUM", "SVC", "SVD", "SVG", "SVH", "SVI", "SVN", "SVT", "SWC", "SZE", "SZL", "TA3", "TA6", "TAW", "TB8", "TBC", "TBD", "TBT", "TBX", "TC6", "TCB", "TCL", "TCM", "TCO", "TCR", "TCT", "TDC", "TDH", "TDN", "TDP", "TDS", "TDW", "TEG", "TET", "TFC", "TGP", "TH1", "THB", "THD", "THG", "THS", "THT", "THU", "THW", "TIE", "TIG", "TIP", "TIS", "TIX", "TJC", "TKC", "TKG", "TKU", "TL4", "TLG", "TLH", "TLT", "TMC", "TMP", "TMS", "TMT", "TMW", "TMX", "TN1", "TNA", "TNB", "TNC", "TNG", "TNM", "TNT", "TOP", "TOT", "TPB", "TPC", "TPH", "TPP", "TRA", "TRC", "TRS", "TS4", "TSB", "TSC", "TST", "TTA", "TTB", "TTC", "TTF", "TTG", "TTN", "TTP", "TTZ", "TV1", "TV2", "TV3", "TV4", "TV6", "TVA", "TVC", "TVD", "TVG", "TVS", "TXM", "TYA", "UCT", "UDC", "UDJ", "UIC", "UMC", "UNI", "UPC", "USC", "USD", "V11", "V12", "V15", "V21", "VAB", "VAF", "VAT", "VAV", "VBC", "VBH", "VC1", "VC2", "VC3", "VC5", "VC6", "VC7", "VC9", "VCA", "VCB", "VCC", "VCF", "VCG", "VCM", "VCR", "VCS", "VCT", "VCX", "VDB", "VDL", "VDN", "VDS", "VDT", "VE1", "VE2", "VE3", "VE4", "VE8", "VE9", "VEF", "VES", "VFC", "VFG", "VFR", "VGC", "VGP", "VGS", "VHC", "VHF", "VHG", "VHH", "VHL", "VIB", "VIC", "VID", "VIE", "VIG", "VIN", "VIP", "VIR", "VIT", "VIX", "VKC", "VKP", "VLA", "VLF", "VMC", "VMD", "VMG", "VNA", "VNC", "VND", "VNE", "VNF", "VNG", "VNH", "VNI", "VNL", "VNM", "VNR", "VNS", "VNT", "VNX", "VOS", "VPB", "VPC", "VPG", "VPH", "VPR", "VPW", "VQC", "VRC", "VRG", "VSC", "VSE", "VSG", "VSH", "VSI", "VST", "VTA", "VTB", "VTC", "VTE", "VTH", "VTI", "VTJ", "VTK", "VTL", "VTM", "VTO", "VTS", "VTV", "VTX", "VXB", "VXP", "WCS", "WSB", "WSS", "WTC", "X20", "X26", "X77", "XMC", "XMD", "XPH", "YBC"]
+            let bank_code = ["CTG", "BID", "VCB", "VIB", "MBB", "TCB", "HDB", "STB", "EIB", "ACB", "VPB", "MSB", "NAB", "PGB", "ABB", "KLB", "SHB", "SGB", "STB", "VPB"]
+
+            //advanced
+            const errorMessage = document.getElementById("error-message");
+            const userInput = document.getElementById("user_input");
+            const errorMessageBank = document.getElementById("error-message-bank");
+            const errorMessageYear = document.getElementById("error-message-year");
+
+            userInput.addEventListener('click', () => {
+                if (userInput.value === "Mã Chứng Khoán") {
+                    userInput.value = '';
+                }
+            });
+
+            //const form = document.querySelector('form');
+            const formAD = document.getElementById('advancedForm');
+
+
+            formAD.addEventListener('submit', (event) => {
+                if (avaiCode.includes(userInput.value)) {
+                    errorMessage.style.display = "none";
+                }
+                else {
+                    errorMessage.style.display = "block"
+                    event.preventDefault();
+                    //return false; // Prevent form submission
+                }
+
+                if (bank_code.includes(userInput.value)) {
+                    errorMessageBank.style.display = "block"
+                    event.preventDefault();
+                    //return false;
+                }
+                else {
+                    errorMessageBank.style.display = "none"
+                }
+
+            });
+
+
+            userInput.addEventListener('input', () => {
+                if (avaiCode.includes(userInput.value)) {
+                    errorMessage.style.display = "none";
+                }
+                else {
+                    errorMessage.style.display = "block"
+                    event.preventDefault();
+                    //return false; // Prevent form submission
+                }
+            });
+
+            userInput.addEventListener('input', () => {
+                if (bank_code.includes(userInput.value)) {
+                    errorMessageBank.style.display = "block"
+                    event.preventDefault();
+                    //return false;
+                }
+                else {
+                    errorMessageBank.style.display = "none"
+                }
+            });
+
+
+            //simple
+            const errorMessageSimple = document.getElementById("error-message-simple");
+            const userInputSimple = document.getElementById("user_input_simple");
+            const errorMessageBankSimple = document.getElementById("error-message-bank-simple");
+            const errorMessageYearSimple = document.getElementById("error-message-year-simple");
+
+
+
+            userInputSimple.addEventListener('click', () => {
+                if (userInputSimple.value === "Mã Chứng Khoán") {
+                    userInputSimple.value = '';
+                }
+            });
+
+            const formSimple = document.getElementById('simpleForm');
+
+
+            formSimple.addEventListener('submit', (event) => {
+                if (avaiCode.includes(userInputSimple.value)) {
+                    errorMessageSimple.style.display = "none";
+                }
+                else {
+                    errorMessageSimple.style.display = "block"
+                    event.preventDefault();
+                    //return false; // Prevent form submission
+                }
+
+                if (bank_code.includes(userInputSimple.value)) {
+                    errorMessageBankSimple.style.display = "block"
+                    event.preventDefault();
+                    //return false;
+                }
+                else {
+                    errorMessageBankSimple.style.display = "none"
+                }
+
+            });
+
+
+            userInputSimple.addEventListener('input', () => {
+                if (avaiCode.includes(userInputSimple.value)) {
+                    errorMessageSimple.style.display = "none";
+                }
+                else {
+                    errorMessageSimple.style.display = "block"
+                    event.preventDefault();
+                    //return false; // Prevent form submission
+                }
+            });
+
+            userInputSimple.addEventListener('input', () => {
+                if (bank_code.includes(userInputSimple.value)) {
+                    errorMessageBankSimple.style.display = "block"
+                    event.preventDefault();
+                    //return false;
+                }
+                else {
+                    errorMessageBankSimple.style.display = "none"
+                }
+            });
+        });
+
+        
+
+        function validateFormAD() {
+            for (let i = 1; i <= 10; i++) {
+                const yearInput = parseFloat(document.getElementById(`year${i}`).value);
+
+                // If the year input is not a valid float, display an error message and prevent form submission
+                if (isNaN(yearInput)) {
+                    document.getElementById("error-message-year").style.display = "block";
+                    return false;
+                }
+            }
+
+            return true; // Allow form submission
+        }
+
+        function validateFormSimple() {
+                // If the year input is not a valid float, display an error message and prevent form submission
+                yearInput = document.getElementById("5years").value;
+            if (isNaN(yearInput)) {
+                document.getElementById("error-message-year-simple").style.display = "block";
+                return false;
+            }
+            
+
+            return true; // Allow form submission
+        }
+
+    </script>
+</body>
+
+</html>

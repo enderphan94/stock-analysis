@@ -7,6 +7,9 @@ from collections import defaultdict
 import json
 import argparse
 import os
+import locale
+
+locale.setlocale(locale.LC_ALL, '')
 
 pd.set_option('display.max_rows', 500)
 pd.set_option('display.max_columns', 500)
@@ -37,7 +40,7 @@ tax = 0.2
 
 directory = 'data/2023/'
 
-def getRate(bank,period, fr, to, growth):
+def getRate(bank,period,types, fr, to, growth):
 	global CEO
 	global tax
 	global directory
@@ -253,9 +256,9 @@ def getRate(bank,period, fr, to, growth):
 			if(ebit+1 >= len(bankEbitDict)):
 				break
 			ebit1t = div((list(bankEbitDict.values())[ebit+1] - list(bankEbitDict.values())[ebit]),list(bankEbitDict.values())[ebit])
-			perdiod = str(list(bankEbitDict.keys())[ebit]) + "-" + str(list(bankEbitDict.keys())[ebit+1])
+			period = str(list(bankEbitDict.keys())[ebit]) + "-" + str(list(bankEbitDict.keys())[ebit+1])
 			result = ceil(ebit1t * 100, 2)
-			rateYearly[perdiod] = result
+			rateYearly[period] = result
 			ebit+=1
 
 		#print(rateYearly)
@@ -455,7 +458,7 @@ def getRate(bank,period, fr, to, growth):
 	delimiter = ","
 	growthList = growth.split(delimiter)
 
-	if len(growthList) != 10:
+	if types == "advanced" and len(growthList) != 10:
 			raise ValueError("You should enter the growth value for the next 10 years")
 	
 	futureData=defaultdict(list)
@@ -474,7 +477,6 @@ def getRate(bank,period, fr, to, growth):
 	futureData[nextYear].append({11:0.035})
 	futureData[finalYear].append({0:0.035})
 
-	print(futureData)
 	# futureData["2023"].append({1:0.15})
 	# futureData["2024"].append({2:0.15})
 	# futureData["2025"].append({3:0.15})
@@ -587,6 +589,7 @@ def getRate(bank,period, fr, to, growth):
 
 	# Giá trị nội tại/1 cổ phần
 	instinctValue = companyValueForShares/(commonStockLatest/10)
+	instinctValue = ceil(instinctValue,0)
 	#print(instinctValue, companyValueForShares,commonStockLatest )
 	# print("VCSH",equityLatest)
 	# print("VCSH-non",uncontrollELatest)
@@ -618,8 +621,8 @@ def getRate(bank,period, fr, to, growth):
 																				for bproinvest, vproinvest in proReinvestYearlyDict.items():
 																					if name == x == i == a == c == e == p == l == o == bwacc == bwaccav == broce == bworkingcap == btotalreinvest == bproinvest:
 																						classA["Tăng trưởng từng năm"].append(y)
-																						classA["Tăng trưởng TB / năm (Lợi nhuận trước lãi vay sau thuế)"].append(ceil(rate,2))
-																						classA["Lợi nhuận ròng TB / năm"].append(ceil(j,2))
+																						classA["Tăng trưởng TB / năm (Lợi nhuận trước lãi vay sau thuế)"].append(str(ceil(rate,2))+"%")
+																						classA["Lợi nhuận ròng TB / năm"].append(str(ceil(j,2))+"%")
 																						classA["Tỷ trọng VCSH / Tổng Vốn từng năm"].append(b)
 																						classA["Tỷ trọng VCSH / Tổng Vốn (Bình quân)"].append(d[0])
 																						classA["Tỷ trọng vốn vay / Tổng Vốn từng năm"].append(u)
@@ -648,13 +651,13 @@ def getRate(bank,period, fr, to, growth):
 					classA["Tỷ lệ tái đầu tư (Bình quân) "].append(vtotalreinvestav)
 					classA["Tốc độ tăng trưởng giai đoạn nhanh (Tỷ lệ tái đầu tư * Tỷ suất sinh lợi trên vốn)"].append(vfastgrowth)												
 	
-	classA["Giá trị hiện tại của tất cả dòng tiền tự do"].append(pVTerminalValue)
-	classA["Giá trị tiền mặt"].append(cashYearLatest)
-	classA["Giá trị Doanh Nghiệp"].append(companyValue)
-	classA["Giá trị doanh nghiệp hợp nhất - sau nợ"].append(companyValueAfterDebt)
-	classA["\% của cổ đông công ty"].append(perShares)
-	classA["Giá trị doanh nghiệp dành cho cổ đông"].append(companyValueForShares)
-	classA["Giá trị nội tại/1 cổ phần"].append(instinctValue)
+	classA["Giá trị hiện tại của tất cả dòng tiền tự do"].append(locale.format_string("%0.2f", pVTerminalValue, grouping=True))
+	classA["Giá trị tiền mặt"].append(locale.format_string("%0.2f", cashYearLatest, grouping=True))
+	classA["Giá trị Doanh Nghiệp"].append(locale.format_string("%0.2f", companyValue, grouping=True))
+	classA["Giá trị doanh nghiệp hợp nhất - sau nợ"].append(locale.format_string("%0.2f", companyValueAfterDebt, grouping=True))
+	classA["\% của cổ đông công ty"].append(str(perShares)+ " %")
+	classA["Giá trị doanh nghiệp dành cho cổ đông"].append(locale.format_string("%0.2f", companyValueForShares, grouping=True))
+	classA["Giá trị nội tại / 1 cổ phần"].append(str(instinctValue)+" "+"VND")
 
 
 	#allClasses[bank] = classA
@@ -667,6 +670,7 @@ if __name__ == "__main__":
 
 	parser = argparse.ArgumentParser(description='Process some integers.')
 	parser.add_argument('--code', type=str, help='a company code')
+	parser.add_argument('--type', type=str, help='a company code')
 	parser.add_argument('--fr', type=str, help='from year')
 	parser.add_argument('--to', type=str, help='to year')
 	parser.add_argument('--growth', type=str, help='predicted growths in the next 10 years separated by comma')
@@ -677,10 +681,14 @@ if __name__ == "__main__":
 		sys.exit(1)
 	
 	code = args.code
+	types = args.type
 	fromYear = args.fr
 	toYear = args.to
 	growth = args.growth
-	getRate(code,'Yearly',fromYear,toYear, growth)
+	if code in bank_code:
+		print("Error: The instrinct value is not applied for banks yet")
+				
+	getRate(code,'Yearly',types,fromYear,toYear, growth)
 
 
 
